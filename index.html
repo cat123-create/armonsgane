@@ -1,1 +1,200 @@
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Galaxy Empire: Starforge</title>
+<style>
+*{box-sizing:border-box}
+body{
+  margin:0;background:#050b19;color:#eef7ff;
+  font-family:Arial,sans-serif;text-align:center;
+}
+header{
+  padding:22px;background:#0b1830;
+  border-bottom:2px solid #35cfff;
+}
+h1{color:#5cd9ff;margin:0}
+main{max-width:850px;margin:20px auto;padding:12px}
+.resources,.buildings{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
+  gap:12px;margin:18px 0;
+}
+.card{
+  background:#0d1b35;border:1px solid #25456e;
+  padding:18px;border-radius:12px;
+}
+.value{font-size:22px;color:#ffd166;font-weight:bold}
+button{
+  background:linear-gradient(90deg,#087ba8,#5945bd);
+  color:white;border:0;padding:11px 15px;border-radius:8px;
+  cursor:pointer;font-weight:bold;margin:4px;
+}
+button:hover{filter:brightness(1.25)}
+button:disabled{opacity:.4;cursor:not-allowed}
+.planet{
+  background:radial-gradient(circle at 35% 30%,#7bdfc0,#277cae 45%,#101c55 75%);
+  border-radius:50%;width:190px;height:190px;margin:25px auto;
+  box-shadow:0 0 45px #35cfff77;
+  display:grid;place-items:center;font-size:65px;
+}
+p{color:#a9c0df}
+#log{min-height:24px;color:#5cd9ff}
+</style>
+</head>
+<body>
+<header>
+  <h1>🪐 GALAXY EMPIRE</h1>
+  <p>BUILD • EXPAND • DOMINATE</p>
+</header>
+
+<main>
+  <div class="planet">🏙️</div>
+  <h2 id="planetName">Nova Prime</h2>
+  <p>Build your civilization. Explore the galaxy. Become an empire.</p>
+
+  <div class="resources">
+    <div class="card">🪙 Credits<div class="value" id="credits">150</div></div>
+    <div class="card">⚡ Energy<div class="value" id="energy">60</div></div>
+    <div class="card">💎 Minerals<div class="value" id="minerals">30</div></div>
+    <div class="card">🔬 Research<div class="value" id="research">0</div></div>
+  </div>
+
+  <h2>🏗️ Build Your Empire</h2>
+  <div class="buildings">
+    <div class="card">
+      <h3>🌿 Solar Farm</h3>
+      <p>Produces energy every second.</p>
+      <p>Cost: 35 credits</p>
+      <button onclick="build('farm')">Build / Upgrade</button>
+      <p>Level: <span id="farm">0</span></p>
+    </div>
+    <div class="card">
+      <h3>💎 Mining Rig</h3>
+      <p>Produces minerals every second.</p>
+      <p>Cost: 50 credits</p>
+      <button onclick="build('mine')">Build / Upgrade</button>
+      <p>Level: <span id="mine">0</span></p>
+    </div>
+    <div class="card">
+      <h3>🏙️ Habitat Dome</h3>
+      <p>Earns credits every second.</p>
+      <p>Cost: 75 credits</p>
+      <button onclick="build('hab')">Build / Upgrade</button>
+      <p>Level: <span id="hab">0</span></p>
+    </div>
+    <div class="card">
+      <h3>🔬 Research Lab</h3>
+      <p>Generates research points.</p>
+      <p>Cost: 100 credits</p>
+      <button onclick="build('lab')">Build / Upgrade</button>
+      <p>Level: <span id="lab">0</span></p>
+    </div>
+  </div>
+
+  <h2>🌌 Explore the Galaxy</h2>
+  <button onclick="explore()">🚀 Explore (20 Energy)</button>
+  <button onclick="saveGame()">💾 Save Game</button>
+  <button onclick="resetGame()">🔄 Reset</button>
+  <p id="log">Welcome, Commander!</p>
+  <p>Planets unlocked: <strong id="planets">1</strong> / 5</p>
+</main>
+
+<script>
+const defaults = {
+  credits:150, energy:60, minerals:30, research:0,
+  farm:0, mine:0, hab:0, lab:0, planets:1
+};
+
+let game;
+try {
+  game = {...defaults,...JSON.parse(
+    localStorage.getItem("galaxyEmpire") || "{}"
+  )};
+} catch {
+  game = {...defaults};
+}
+
+const costs = {farm:35,mine:50,hab:75,lab:100};
+
+function show(message) {
+  document.getElementById("log").textContent = message;
+}
+
+function render() {
+  ["credits","energy","minerals","research",
+   "farm","mine","hab","lab","planets"].forEach(key=>{
+    document.getElementById(key).textContent =
+      Math.floor(game[key]).toLocaleString();
+  });
+}
+
+function saveGame() {
+  localStorage.setItem("galaxyEmpire",JSON.stringify(game));
+  show("Empire saved on this device!");
+}
+
+function build(type) {
+  let cost = Math.floor(costs[type] * Math.pow(1.5,game[type]));
+  if(game.credits < cost) {
+    show("Not enough credits! Build your economy first.");
+    return;
+  }
+
+  game.credits -= cost;
+  game[type]++;
+  show(type.toUpperCase()+" upgraded to level "+game[type]+"!");
+  render();
+  saveGame();
+}
+
+function explore() {
+  if(game.energy < 20) {
+    show("Not enough energy to explore!");
+    return;
+  }
+
+  game.energy -= 20;
+  const roll = Math.random();
+
+  if(roll < .35) {
+    game.minerals += 40;
+    show("Asteroid discovered! +40 minerals.");
+  } else if(roll < .7) {
+    game.credits += 100;
+    show("Abandoned space station found! +100 credits.");
+  } else if(roll < .9) {
+    game.research += 25;
+    show("Alien technology discovered! +25 research.");
+  } else {
+    game.planets = Math.min(5,game.planets+1);
+    show("NEW PLANET COLONIZED! Your empire expands!");
+  }
+
+  document.getElementById("planets").textContent=game.planets;
+  render();
+  saveGame();
+}
+
+function resetGame() {
+  if(!confirm("Erase your empire and start again?")) return;
+  game = {...defaults};
+  saveGame();
+  render();
+  show("A new empire begins!");
+}
+
+setInterval(()=>{
+  game.energy += game.farm * 1.5;
+  game.minerals += game.mine * 0.8;
+  game.credits += game.hab * 1.2;
+  game.research += game.lab * 0.4;
+  render();
+  saveGame();
+},1000);
+
+render();
+</script>
+</body>
+</html>
