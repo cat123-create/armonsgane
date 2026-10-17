@@ -1,200 +1,744 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Galaxy Empire: Starforge</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Ore &amp; Amps</title>
 <style>
+:root{--bg:#0b1220;--panel:#18222f;--line:#2f4259;--text:#e8edf3;--dim:#93a1b3;--en:#4fd1c5;--cr:#f2b84b;--co:#c792ea;--bad:#ff7a7a}
 *{box-sizing:border-box}
-body{
-  margin:0;background:#050b19;color:#eef7ff;
-  font-family:Arial,sans-serif;text-align:center;
-}
-header{
-  padding:22px;background:#0b1830;
-  border-bottom:2px solid #35cfff;
-}
-h1{color:#5cd9ff;margin:0}
-main{max-width:850px;margin:20px auto;padding:12px}
-.resources,.buildings{
-  display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
-  gap:12px;margin:18px 0;
-}
-.card{
-  background:#0d1b35;border:1px solid #25456e;
-  padding:18px;border-radius:12px;
-}
-.value{font-size:22px;color:#ffd166;font-weight:bold}
-button{
-  background:linear-gradient(90deg,#087ba8,#5945bd);
-  color:white;border:0;padding:11px 15px;border-radius:8px;
-  cursor:pointer;font-weight:bold;margin:4px;
-}
-button:hover{filter:brightness(1.25)}
-button:disabled{opacity:.4;cursor:not-allowed}
-.planet{
-  background:radial-gradient(circle at 35% 30%,#7bdfc0,#277cae 45%,#101c55 75%);
-  border-radius:50%;width:190px;height:190px;margin:25px auto;
-  box-shadow:0 0 45px #35cfff77;
-  display:grid;place-items:center;font-size:65px;
-}
-p{color:#a9c0df}
-#log{min-height:24px;color:#5cd9ff}
+[hidden]{display:none!important}
+body{margin:0;background:radial-gradient(1200px 600px at 50% -200px,#1b2c47,var(--bg)) fixed;color:var(--text);font:16px/1.45 "Trebuchet MS",system-ui,sans-serif;padding:0 12px 96px}
+main{max-width:760px;margin:0 auto}
+#hud{position:sticky;top:0;z-index:6;margin:0 -12px 12px;padding:8px 12px;background:rgba(10,17,30,.92);backdrop-filter:blur(6px);border-bottom:1px solid var(--line)}
+#hud .in{max-width:760px;margin:0 auto}
+.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+h1{margin:0;font-size:1.25rem;letter-spacing:.5px;text-shadow:0 2px 0 #000}
+.pills{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.pill{background:linear-gradient(#233248,#18222f);border:1px solid var(--line);border-top:3px solid var(--c);border-radius:12px;padding:4px 10px;box-shadow:0 3px 0 rgba(0,0,0,.35)}
+.pill b{display:block;font-size:1.35rem;transform-origin:left center}
+.pill span{color:var(--dim);font-size:.75rem;text-transform:uppercase;letter-spacing:1px}
+#en{--c:var(--en)}#cr{--c:var(--cr)}#co{--c:var(--co)}
+#en b{color:var(--en)}#cr b{color:var(--cr)}#co b{color:var(--co)}
+.bar{height:8px;background:#0f1722;border:1px solid var(--line);border-radius:6px;overflow:hidden;margin:8px 0 0}
+.bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--cr),var(--en))}
+#hint{background:linear-gradient(#22344b,#1a2a3e);border:1px solid var(--line);border-left:4px solid var(--cr);border-radius:10px;padding:8px 12px;margin:0 0 12px;font-size:.95rem}
+#scene{display:block;width:100%;height:auto;border:2px solid #2a3b55;border-radius:14px;box-shadow:0 6px 0 rgba(0,0,0,.4);margin-bottom:10px;touch-action:manipulation;-webkit-user-select:none;user-select:none}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.chips span{background:#142033;border:1px solid var(--line);border-radius:999px;padding:3px 11px;font-size:.82rem;color:var(--dim)}
+section{background:linear-gradient(#1d2a3c,#17212f);border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin-bottom:12px;box-shadow:0 4px 0 rgba(0,0,0,.35)}
+h2{margin:0 0 6px;font-size:1.05rem;text-shadow:0 1px 0 #000}
+.row{display:flex;flex-wrap:wrap;gap:8px}
+.note{color:var(--dim);font-size:.88rem;margin:6px 0 0}
+button{font:inherit;color:var(--text);background:linear-gradient(#3d5273,#2c3d58);border:1px solid #4f6a93;border-bottom-width:3px;border-radius:10px;padding:8px 12px;cursor:pointer;text-shadow:0 1px 0 rgba(0,0,0,.5)}
+button:hover:not(:disabled){filter:brightness(1.12)}
+button:active:not(:disabled){transform:translateY(2px);border-bottom-width:1px}
+button:focus-visible{outline:2px solid var(--en);outline-offset:2px}
+button:disabled{opacity:.45;cursor:not-allowed}
+button.big{background:linear-gradient(#5fe0d3,#2fae9f);color:#05221e;font-weight:700;border-color:#8af0e4;padding:12px 18px;text-shadow:none}
+button.sm{padding:3px 9px;font-size:.8rem}
+button.ready{border-color:var(--cr);box-shadow:0 0 10px rgba(242,184,75,.55);animation:glow 1.4s infinite}
+@keyframes glow{50%{box-shadow:0 0 18px rgba(242,184,75,.95)}}
+.bump{animation:bump .3s}@keyframes bump{50%{transform:scale(1.18)}}
+#en.low b{color:var(--bad);animation:lowp 1s infinite}@keyframes lowp{50%{opacity:.45}}
+.mh{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.mbar{height:8px;background:#0f1722;border-radius:5px;overflow:hidden;margin:8px 0}
+.mbar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--cr),var(--en))}
+.wrow{padding:8px 12px;margin-bottom:8px}
+.upc{display:flex;gap:10px;justify-content:space-between;align-items:center;flex-wrap:wrap}
+.upc>div{flex:1 1 220px}.upc h2{margin:0}
+.srow{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--line)}
+#mpg button.on,#wpgs button.on{background:linear-gradient(#5fe0d3,#2fae9f);color:#05221e;border-color:#8af0e4;font-weight:700}
+label{display:inline-flex;flex-wrap:wrap;gap:6px;align-items:center;color:var(--dim);font-size:.9rem}
+#auth{z-index:60}
+.frm label{display:flex;flex-direction:column;align-items:stretch;text-align:left;margin-bottom:8px;gap:4px}
+.frm input{width:100%}
+input[type=number],input[type=text],input[type=password]{font:inherit;width:8em;padding:6px 8px;border-radius:8px;border:1px solid var(--line);background:#10151c;color:var(--text)}
+#log{color:var(--dim);font-size:.9rem;min-height:5.5em}#log div:first-child{color:var(--text)}
+#win{background:#1f3a2c;border:1px solid var(--en);border-radius:12px;padding:12px 14px;margin-bottom:12px}
+#tabs{position:fixed;left:0;right:0;bottom:0;z-index:7;display:grid;grid-template-columns:repeat(7,1fr);gap:4px;padding:6px 6px calc(6px + env(safe-area-inset-bottom));background:rgba(10,17,30,.96);border-top:1px solid var(--line)}
+#tabs button{display:flex;flex-direction:column;align-items:center;gap:0;padding:5px 1px;font-size:.62rem;border-radius:10px;line-height:1.2}
+#tabs button b{font-size:1.15rem;font-weight:400}
+#tabs button.on{background:linear-gradient(#5fe0d3,#2fae9f);color:#05221e;border-color:#8af0e4;font-weight:700}
+#toast{position:fixed;top:64px;left:50%;transform:translate(-50%,-140px);background:var(--cr);color:#241a05;font-weight:700;padding:10px 18px;border-radius:12px;transition:transform .35s;z-index:30;max-width:90%;text-align:center;box-shadow:0 4px 0 rgba(0,0,0,.4)}
+#toast.on{transform:translate(-50%,0)}
+#pzl,#intro,#auth{position:fixed;inset:0;background:rgba(5,8,14,.86);display:flex;align-items:center;justify-content:center;z-index:40;padding:16px}
+#pzl .box,#intro .box,#auth .box{background:var(--panel);border:1px solid var(--cr);border-radius:14px;padding:18px;max-width:420px;width:100%;text-align:center;max-height:100%;overflow:auto}
+#intro p{text-align:left}
+#pzq{margin:8px 0}
+#pzc{display:block;margin:0 auto;width:min(360px,100%);height:auto;border:1px solid var(--line);border-radius:10px;touch-action:manipulation;cursor:pointer}
+.dpad{display:grid;grid-template-columns:repeat(3,58px);gap:6px;justify-content:center;margin:10px 0}
+.dpad button{padding:10px 0;font-size:1.1rem}
+#dN{grid-area:1/2}#dW{grid-area:2/1}#dS{grid-area:2/2}#dE{grid-area:2/3}#dR{grid-area:3/1/4/4}
+footer{margin-top:6px;text-align:right}
+@media(max-width:520px){.pill b{font-size:1.1rem}}
+@media(prefers-reduced-motion:reduce){.bump,button.ready,#en.low b{animation:none}#toast{transition:none}}
 </style>
 </head>
 <body>
-<header>
-  <h1>🪐 GALAXY EMPIRE</h1>
-  <p>BUILD • EXPAND • DOMINATE</p>
-</header>
-
+<div id="toast" role="status"></div>
+<div id="pzl" hidden><div class="box"><h2 id="pzt"></h2><p id="pzq"></p>
+ <canvas id="pzc" width="360" height="360"></canvas>
+ <div id="pzd" class="dpad"><button id="dN">&#9650;</button><button id="dW">&#9664;</button><button id="dS">&#9660;</button><button id="dE">&#9654;</button><button id="dR">Reset</button></div>
+ <p class="note" id="pzn"></p>
+ <div class="row" id="pzs" style="justify-content:center;margin-top:10px"><button id="sk_e"></button><button id="sk_c"></button><button id="sk_k"></button></div>
+ <p class="note">Skipping gives no reward. Energy costs the most, credits less, and coins the least.</p></div></div>
+<div id="intro" hidden><div class="box"><h2>Welcome, miner!</h2>
+ <p>1. Open the <b>Mines</b> tab and send a worker to a mine. The trip takes a few seconds, then your worker comes back with credits.</p>
+ <p>2. Each mine fits up to 5 workers. Hire more workers, and upgrade <b>Mines at once</b> to work several different mines together. The Workers tab shows what each one is doing.</p>
+ <p>3. Spend credits in the Shop. Coins buy upgrades, speed, workers, turrets, and new mines.</p>
+ <p>4. Every 100 energy you spend, a puzzle appears. Solve it to keep going, or pay energy, credits, or coins to skip it.</p>
+ <p>5. In the Auto tab, buy an Auto-Dispatcher and autobuyers that spend your money for you.</p>
+ <button class="big" id="introb">Let's mine!</button></div></div>
+<div id="auth"><div class="box">
+ <h2 id="at">Log in</h2>
+ <p class="note">Log in to save your progress. Accounts and saves are stored in this browser on this device only, so they will not follow you to another device.</p>
+ <div class="frm"><label>Username <input type="text" id="au" autocomplete="username" maxlength="20" autocapitalize="off"></label>
+ <label>Password <input type="password" id="ap" autocomplete="current-password" maxlength="64"></label></div>
+ <p id="am" class="note" style="color:var(--bad);min-height:1.4em"></p>
+ <div class="row" style="justify-content:center"><button class="big" id="ab">Log in</button><button id="as">Create account</button></div>
+ <div class="row" style="justify-content:center;margin-top:8px"><button id="ag">Play as guest (no saving)</button><button id="ax" hidden>Close</button></div>
+</div></div>
+<header id="hud"><div class="in">
+ <div class="top"><div><h1>Ore &amp; Amps</h1><div class="note" id="usr" style="margin:0"></div></div><div><button id="howto" class="sm">How to play</button> <button id="snd" class="sm">Sound: on</button> <button id="acct" class="sm"></button></div></div>
+ <div class="pills"><div class="pill" id="en"><b>0</b><span>Energy</span></div><div class="pill" id="cr"><b>0</b><span>Credits</span></div><div class="pill" id="co"><b>0</b><span>Coins</span></div></div>
+ <div class="bar" title="Mines unlocked out of 100"><i id="prog"></i></div>
+</div></header>
 <main>
-  <div class="planet">🏙️</div>
-  <h2 id="planetName">Nova Prime</h2>
-  <p>Build your civilization. Explore the galaxy. Become an empire.</p>
+<div id="win" hidden><b>You won!</b> You unlocked all 100 mines. Keep playing as long as you like.</div>
+<div id="hint" role="status"></div>
 
-  <div class="resources">
-    <div class="card">🪙 Credits<div class="value" id="credits">150</div></div>
-    <div class="card">⚡ Energy<div class="value" id="energy">60</div></div>
-    <div class="card">💎 Minerals<div class="value" id="minerals">30</div></div>
-    <div class="card">🔬 Research<div class="value" id="research">0</div></div>
-  </div>
+<div id="p-mine">
+<div id="host1"><canvas id="scene" width="720" height="260" role="img" aria-label="Your workers walk to the mine and come back with ore. Turrets fire as they mine."></canvas></div>
+<div class="chips"><span id="chw"></span><span id="chs"></span><span id="chv"></span></div>
+<section>
+ <h2>Crew</h2>
+ <div class="row"><button class="big" id="crew">Send workers to the best mines</button><button id="gen" hidden>Emergency generator (+60 energy)</button></div>
+ <p class="note">Each mine fits up to 5 workers at a time, and a trip takes a few seconds. Press Space to send the crew, or pick mines yourself in the Mines tab.</p>
+</section>
+<section>
+ <h2>Turrets</h2>
+ <div class="row"><button id="pz">Pause turrets (P)</button><button id="rs"></button></div>
+ <p class="note" id="tinfo"></p>
+</section>
+<section><h2>Log</h2><div id="log"></div></section>
+</div>
 
-  <h2>🏗️ Build Your Empire</h2>
-  <div class="buildings">
-    <div class="card">
-      <h3>🌿 Solar Farm</h3>
-      <p>Produces energy every second.</p>
-      <p>Cost: 35 credits</p>
-      <button onclick="build('farm')">Build / Upgrade</button>
-      <p>Level: <span id="farm">0</span></p>
-    </div>
-    <div class="card">
-      <h3>💎 Mining Rig</h3>
-      <p>Produces minerals every second.</p>
-      <p>Cost: 50 credits</p>
-      <button onclick="build('mine')">Build / Upgrade</button>
-      <p>Level: <span id="mine">0</span></p>
-    </div>
-    <div class="card">
-      <h3>🏙️ Habitat Dome</h3>
-      <p>Earns credits every second.</p>
-      <p>Cost: 75 credits</p>
-      <button onclick="build('hab')">Build / Upgrade</button>
-      <p>Level: <span id="hab">0</span></p>
-    </div>
-    <div class="card">
-      <h3>🔬 Research Lab</h3>
-      <p>Generates research points.</p>
-      <p>Cost: 100 credits</p>
-      <button onclick="build('lab')">Build / Upgrade</button>
-      <p>Level: <span id="lab">0</span></p>
-    </div>
-  </div>
+<div id="p-mines" hidden>
+<div id="host2"></div>
+<div class="chips"><span id="chw2"></span><span id="chs2"></span><span id="chv2"></span></div>
+<section><h2>Mines</h2><p class="note" id="mreg"></p><div class="row" id="mpg" style="margin-top:8px"><button id="mp0">1</button><button id="mp1">2</button><button id="mp2">3</button><button id="mp3">4</button><button id="mp4">5</button><button id="mp5">6</button><button id="mp6">7</button><button id="mp7">8</button><button id="mp8">9</button><button id="mp9">10</button></div></section>
+<section><div class="mh"><h2 id="mn0"></h2><span class="note" id="mt0"></span></div><p class="note" id="md0"></p><div class="mbar"><i id="mf0"></i></div><button id="mb0"></button></section>
+<section><div class="mh"><h2 id="mn1"></h2><span class="note" id="mt1"></span></div><p class="note" id="md1"></p><div class="mbar"><i id="mf1"></i></div><button id="mb1"></button></section>
+<section><div class="mh"><h2 id="mn2"></h2><span class="note" id="mt2"></span></div><p class="note" id="md2"></p><div class="mbar"><i id="mf2"></i></div><button id="mb2"></button></section>
+<section><div class="mh"><h2 id="mn3"></h2><span class="note" id="mt3"></span></div><p class="note" id="md3"></p><div class="mbar"><i id="mf3"></i></div><button id="mb3"></button></section>
+<section><div class="mh"><h2 id="mn4"></h2><span class="note" id="mt4"></span></div><p class="note" id="md4"></p><div class="mbar"><i id="mf4"></i></div><button id="mb4"></button></section>
+<section><div class="mh"><h2 id="mn5"></h2><span class="note" id="mt5"></span></div><p class="note" id="md5"></p><div class="mbar"><i id="mf5"></i></div><button id="mb5"></button></section>
+<section><div class="mh"><h2 id="mn6"></h2><span class="note" id="mt6"></span></div><p class="note" id="md6"></p><div class="mbar"><i id="mf6"></i></div><button id="mb6"></button></section>
+<section><div class="mh"><h2 id="mn7"></h2><span class="note" id="mt7"></span></div><p class="note" id="md7"></p><div class="mbar"><i id="mf7"></i></div><button id="mb7"></button></section>
+<section><div class="mh"><h2 id="mn8"></h2><span class="note" id="mt8"></span></div><p class="note" id="md8"></p><div class="mbar"><i id="mf8"></i></div><button id="mb8"></button></section>
+<section><div class="mh"><h2 id="mn9"></h2><span class="note" id="mt9"></span></div><p class="note" id="md9"></p><div class="mbar"><i id="mf9"></i></div><button id="mb9"></button></section>
+</div>
 
-  <h2>🌌 Explore the Galaxy</h2>
-  <button onclick="explore()">🚀 Explore (20 Energy)</button>
-  <button onclick="saveGame()">💾 Save Game</button>
-  <button onclick="resetGame()">🔄 Reset</button>
-  <p id="log">Welcome, Commander!</p>
-  <p>Planets unlocked: <strong id="planets">1</strong> / 5</p>
+<div id="p-work" hidden>
+<section><h2>Workers</h2><p class="note" id="wsum"></p><div class="row" id="wpgs" style="margin-top:8px"><button id="wp0">1</button><button id="wp1">2</button><button id="wp2">3</button><button id="wp3">4</button><button id="wp4">5</button></div></section>
+<section class="wrow" id="wr0"><div class="mh"><h2 id="wn0"></h2><span class="note" id="ws0"></span></div><div class="mbar"><i id="wf0"></i></div><button class="sm" id="wb0"></button></section>
+<section class="wrow" id="wr1"><div class="mh"><h2 id="wn1"></h2><span class="note" id="ws1"></span></div><div class="mbar"><i id="wf1"></i></div><button class="sm" id="wb1"></button></section>
+<section class="wrow" id="wr2"><div class="mh"><h2 id="wn2"></h2><span class="note" id="ws2"></span></div><div class="mbar"><i id="wf2"></i></div><button class="sm" id="wb2"></button></section>
+<section class="wrow" id="wr3"><div class="mh"><h2 id="wn3"></h2><span class="note" id="ws3"></span></div><div class="mbar"><i id="wf3"></i></div><button class="sm" id="wb3"></button></section>
+<section class="wrow" id="wr4"><div class="mh"><h2 id="wn4"></h2><span class="note" id="ws4"></span></div><div class="mbar"><i id="wf4"></i></div><button class="sm" id="wb4"></button></section>
+<section class="wrow" id="wr5"><div class="mh"><h2 id="wn5"></h2><span class="note" id="ws5"></span></div><div class="mbar"><i id="wf5"></i></div><button class="sm" id="wb5"></button></section>
+<section class="wrow" id="wr6"><div class="mh"><h2 id="wn6"></h2><span class="note" id="ws6"></span></div><div class="mbar"><i id="wf6"></i></div><button class="sm" id="wb6"></button></section>
+<section class="wrow" id="wr7"><div class="mh"><h2 id="wn7"></h2><span class="note" id="ws7"></span></div><div class="mbar"><i id="wf7"></i></div><button class="sm" id="wb7"></button></section>
+<section class="wrow" id="wr8"><div class="mh"><h2 id="wn8"></h2><span class="note" id="ws8"></span></div><div class="mbar"><i id="wf8"></i></div><button class="sm" id="wb8"></button></section>
+<section class="wrow" id="wr9"><div class="mh"><h2 id="wn9"></h2><span class="note" id="ws9"></span></div><div class="mbar"><i id="wf9"></i></div><button class="sm" id="wb9"></button></section>
+</div>
+
+<div id="p-up" hidden>
+<section class="upc"><div><h2>Mine level</h2><p class="note" id="ui_m"></p></div><button id="upm"></button></section>
+<section class="upc"><div><h2>Worker speed</h2><p class="note" id="ui_s"></p></div><button id="upsp"></button></section>
+<section class="upc"><div><h2>Mines at once</h2><p class="note" id="ui_l"></p></div><button id="upsl"></button></section>
+<section class="upc"><div><h2>Workers</h2><p class="note" id="ui_w"></p></div><button id="upwr"></button></section>
+<section class="upc"><div><h2>Turrets</h2><p class="note" id="ui_t"></p></div><button id="bym"></button></section>
+<section class="upc"><div><h2>Turret power</h2><p class="note" id="ui_tl"></p></div><button id="tur"></button></section>
+</div>
+
+<div id="p-auto" hidden><div id="autobody"></div></div>
+
+<div id="p-shop" hidden>
+<section>
+ <h2>Buy energy</h2>
+ <div class="row"><button id="be10">10 credits</button><button id="bemax">All credits</button></div>
+ <p class="note">1 credit = 4 energy.</p>
+</section>
+<section>
+ <h2>Coins</h2>
+ <div class="row"><button id="cc1">Make 1 coin (80 credits)</button><button id="ccmax">Make max</button></div>
+ <p class="note">Coins cost far more than energy. They unlock mines and buy upgrades, workers, and turrets.</p>
+</section>
+</div>
+
+<div id="p-stats" hidden>
+<section><h2>Stats</h2><div id="statsbody"></div></section>
+</div>
+<footer><button id="reset" class="sm">Reset game</button></footer>
 </main>
-
+<nav id="tabs"><button id="t-mine" class="on"><b>&#127968;</b>Base</button><button id="t-mines"><b>&#9935;</b>Mines</button><button id="t-work"><b>&#128119;</b>Workers</button><button id="t-up"><b>&#11014;</b>Upgrades</button><button id="t-auto"><b>&#129302;</b>Auto</button><button id="t-shop"><b>&#128722;</b>Shop</button><button id="t-stats"><b>&#128202;</b>Stats</button></nav>
 <script>
-const defaults = {
-  credits:150, energy:60, minerals:30, research:0,
-  farm:0, mine:0, hab:0, lab:0, planets:1
+window.startGame=function(USER){
+var KEY=USER?"oreAndAmps3_"+USER.toLowerCase():null,RATE=4,COIN=80,DRAIN=4;
+var $=function(id){return document.getElementById(id)};
+function fresh(){return{e:1000,c:0,k:0,L:1,sp:0,sl:1,wr:1,m:0,t:0,earned:0,age:0,won:0,ms:0,spent:0,nx:100,pn:0,tc:0,last:0,un:[1],tr:[],pz:0,res:60,ac:[],ab:{},al:0,ao:1}}
+function load(){if(!KEY)return null;try{var s=JSON.parse(localStorage.getItem(KEY));return s&&typeof s.e==="number"?s:null}catch(x){return null}}
+function save(){if(!KEY)return;try{localStorage.setItem(KEY,JSON.stringify(S))}catch(x){}}
+var S=load()||fresh(),logs=[],muted=false,ac=null,prev={c:0,e:0,k:0},tt=0;
+S.ms=S.ms||0;S.tr=S.tr||[];S.un=S.un||[1];S.ac=S.ac||[];S.last=S.last||0;S.tc=S.tc||0;if(S.nx-S.spent>100)S.nx=S.spent+100;
+var MS=[100,500,1000,2500,5000,10000,25000,50000,1e5,1e6,1e7,1e8,1e9,1e10,1e11,1e12];
+function sfx(k){
+ if(muted)return;
+ try{ac=ac||new(window.AudioContext||window.webkitAudioContext)();
+ var F={hit:[200,320,.08,"square",.05],crit:[500,1000,.25,"triangle",.12],jack:[400,1600,.5,"triangle",.14],buy:[440,740,.15,"sine",.12],coin:[900,1300,.1,"sine",.1],mile:[520,1560,.6,"triangle",.14],no:[160,100,.15,"sawtooth",.06],t0:[262,262,.3,"sine",.14],t1:[330,330,.3,"sine",.14],t2:[392,392,.3,"sine",.14],t3:[523,523,.3,"sine",.14]}[k],o=ac.createOscillator(),g=ac.createGain(),t=ac.currentTime;
+ o.type=F[3];o.frequency.setValueAtTime(F[0],t);o.frequency.exponentialRampToValueAtTime(F[1],t+F[2]);
+ g.gain.setValueAtTime(F[4],t);g.gain.exponentialRampToValueAtTime(.001,t+F[2]);
+ o.connect(g);g.connect(ac.destination);o.start(t);o.stop(t+F[2]);}catch(x){}}
+function buzz(p){if(!muted)try{navigator.vibrate&&navigator.vibrate(p)}catch(x){}}
+function toast(t){var el=$("toast");el.textContent=t;el.classList.add("on");clearTimeout(tt);tt=setTimeout(function(){el.classList.remove("on")},2600)}
+function miles(){while(S.ms<MS.length&&S.earned>=MS[S.ms]){toast(fmt(MS[S.ms])+" credits earned!");sfx("mile");A.celebrate();S.ms++}}
+function bump(id,v,pv){if(Math.floor(v)>Math.floor(pv)){var b=$(id).firstChild;b.classList.remove("bump");void b.offsetWidth;b.classList.add("bump")}}
+
+
+var BASE=[
+{n:"Copper Pit",mult:1,hp:6,gem:.12,cost:0,lv:1,d:"Steady ore for beginners."},
+{n:"Silver Vein",mult:2,hp:8,gem:.18,cost:10,lv:3,d:"Richer ore, tougher rocks."},
+{n:"Crystal Cavern",mult:3.8,hp:11,gem:.3,cost:30,lv:5,d:"Gems everywhere, but the rocks are very tough."},
+{n:"Magma Forge",mult:7,hp:14,gem:.22,cost:70,lv:8,d:"Molten ore under a blood-red sky."},
+{n:"Frostbite Deep",mult:12,hp:17,gem:.26,cost:150,lv:11,d:"Frozen caverns where it always snows."},
+{n:"Void Rift",mult:20,hp:22,gem:.35,cost:350,lv:14,d:"Glowing motes drift in the dark."}],MINES=[];
+var NOUN=["Pit","Vein","Hollow","Drift","Cavern","Forge","Shaft","Quarry","Rift","Deep"],PRE=["","Jungle","Desert","Abyss","Cloud","Neon","Marsh","Starfall","Clockwork","Core"],R0=["Moss Cave","Ember Hollow","Dusty Drift","Echo Pit"],REG=["The Foothills","Jungle Depths","Sunscorch Desert","The Abyss","Cloud Peaks","Neon Underworld","Bone Marsh","Starfall Fields","Clockwork Caverns","The World Core"];
+(function(){for(var i=0;i<100;i++){if(i<6){MINES.push(BASE[i]);continue}
+ var pg=(i/10)|0,e=i-5;
+ MINES.push({n:i<10?R0[i-6]:PRE[pg]+" "+NOUN[i%10],mult:20*Math.pow(1.16,e),hp:Math.min(40,22+Math.floor(e*.2)),gem:Math.min(.5,.3+(i%10)*.02),cost:Math.ceil(350*Math.pow(1.17,e)),lv:Math.min(50,14+Math.floor(e*.38)),d:REG[pg]+". Richer ore, tougher rocks."})}})();
+function themeOf(i){return i<6?i:i<10?i%6:5+((i/10)|0)}
+var mp=0,TMAX=25,MAXL=50,SUF=["","K","M","B","T","Qa","Qi","Sx","Sp","Oc","No","Dc"];
+function fmt(n){n=Math.floor(n);if(!isFinite(n)||n<0)return"0";if(n<1e6)return n.toLocaleString();var e=Math.min(11,Math.floor(Math.log10(n)/3));return(n/Math.pow(10,3*e)).toFixed(2)+SUF[e]}
+function fx(m){return m>=1000?fmt(m):String(Math.round(m*10)/10)}
+function canUnlock(i){var m=MINES[i];return !S.un[i]&&(i===0||!!S.un[i-1])&&S.k>=m.cost&&S.L>=m.lv}
+
+function userUI(){$("usr").textContent=USER?"Signed in as "+USER:"Guest: progress is not saved";$("acct").textContent=USER?"Log out":"Log in / Sign up"}
+function say(t){logs.unshift(t);logs=logs.slice(0,5);$("log").innerHTML=logs.map(function(l){return"<div>"+l+"</div>"}).join("")}
+function gain(n){S.c+=n;S.earned+=n}
+function nUn(){return S.un.filter(Boolean).length}
+function bestMine(){for(var i=99;i>=0;i--)if(S.un[i])return i;return 0}
+function yieldOf(i){return(5*S.L+2)*MINES[i].mult}
+function yieldNow(){return yieldOf(bestMine())}
+function tripCost(i){return 20+Math.round(i*1.2)}
+function tripTime(i){return Math.max(.8,(3.5+i*.03)/(1+.12*S.sp))}
+var SPMAX=20,SLMAX=10,WRMAX=50,PERMINE=5,wpg=0;
+function upCost(){return Math.ceil(3*Math.pow(1.32,S.L-1))}
+function spCost(){return Math.ceil(4*Math.pow(1.45,S.sp))}
+function slCost(){return Math.ceil(10*Math.pow(2.2,S.sl-1))}
+function wrCost(){return Math.ceil(5*Math.pow(1.2,S.wr-1))}
+function minerCost(){return Math.ceil(6*Math.pow(1.75,S.m))}
+function turCost(){return Math.ceil(2500*Math.pow(1.55,S.t))}
+function mineLoad(i){var n=0;for(var q=0;q<S.tr.length;q++)if(S.tr[q].i===i)n++;return n}
+function activeMines(){var m={},n=0;S.tr.forEach(function(t){if(!m[t.i]){m[t.i]=1;n++}});return n}
+function tripOf(k){for(var q=0;q<S.tr.length;q++)if(S.tr[q].w===k)return S.tr[q];return null}
+function freeWorker(){for(var k=0;k<S.wr;k++)if(!tripOf(k))return k;return -1}
+function canSend(i){var ld=mineLoad(i);return !!S.un[i]&&!puz&&S.tr.length<S.wr&&ld<PERMINE&&(ld>0||activeMines()<S.sl)&&S.e>=tripCost(i)}
+var hold=false;
+function send(i,auto,wi){if(!canSend(i))return false;var w=wi===undefined?freeWorker():wi;if(w<0||w>=S.wr||tripOf(w))return false;
+ var cst=tripCost(i);S.e-=cst;S.spent+=cst;
+ S.tr.push({i:i,s:Date.now(),d:tripTime(i),w:w,lane:w,a:auto?1:0});S.last=i;sfx("hit");
+ if(!hold&&!puz&&S.spent>=S.nx)openPuzzle();return true}
+function reward(t){var m=MINES[t.i],r=Math.random(),tag="",mul=1;
+ if(r<.02){mul=6;tag="JACKPOT!"}else if(r<.12){mul=2.5;tag="Lucky strike!"}
+ if(Math.random()<m.gem){mul*=1.6;tag=tag||"Gem!"}
+ var g=Math.round(yieldOf(t.i)*(.85+Math.random()*.3)*mul);gain(g);S.tc++;
+ A.done(g,tag);sfx(tag==="JACKPOT!"?"jack":tag?"crit":"coin");if(tag)buzz(tag==="JACKPOT!"?[40,30,80]:25);
+ say(m.n+": +"+fmt(g)+(tag?" ("+tag+")":""));miles()}
+function finishTrips(){var now=Date.now(),dn=false;
+ for(var q=S.tr.length-1;q>=0;q--){var t=S.tr[q];if(now>=t.s+t.d*1000){S.tr.splice(q,1);reward(t);dn=true}}
+ if(dn){autoDispatch();render()}}
+function autoDispatch(){if(!S.al||!S.ao||puz)return;var ms={},n=0,i;S.tr.forEach(function(t){if(t.a&&!ms[t.i]){ms[t.i]=1;n++}});
+ hold=true;for(i=99;i>=0;i--){if(!S.un[i])continue;if(!ms[i]&&n>=S.al)continue;
+  var did=false;while(S.e>=tripCost(i)+S.res&&canSend(i)&&send(i,true))did=true;if(did&&!ms[i]){ms[i]=1;n++}}
+ hold=false;if(!puz&&S.spent>=S.nx)openPuzzle()}
+function sendCrew(){var any=false,i;hold=true;for(i=99;i>=0;i--){while(canSend(i)&&send(i,false))any=true}hold=false;if(any&&!puz&&S.spent>=S.nx)openPuzzle();
+ if(!any)say(puz?"Solve the puzzle first.":S.tr.length>=S.wr?"All your workers are busy.":"No free mine slots, or not enough energy.");render()}
+function sendWorker(k){if(k>=S.wr||tripOf(k)||puz)return;for(var i=99;i>=0;i--){if(canSend(i)){send(i,false,k);break}}render()}
+function anySend(){for(var i=0;i<100;i++)if(canSend(i))return true;return false}
+function unlock(i){if(!canUnlock(i))return;var m=MINES[i];S.k-=m.cost;S.un[i]=1;toast(m.n+" unlocked!");sfx("mile");A.celebrate();say(m.n+" unlocked.");render()}
+function buyEnergy(n){n=Math.min(n,Math.floor(S.c));if(n<1){say("You need at least 1 credit.");return}S.c-=n;S.e+=n*RATE;say("Bought "+fmt(n*RATE)+" energy.");render()}
+function makeCoins(n){n=Math.min(n,Math.floor(S.c/COIN));if(n<1){say("You need "+COIN+" credits for a coin.");return}S.c-=n*COIN;S.k+=n;say("Made "+fmt(n)+" coin"+(n>1?"s":"")+".");sfx("coin");render()}
+function upMine(){if(S.L>=MAXL||S.k<upCost())return;S.k-=upCost();S.L++;say("Mine level "+S.L+". Every trip pays more.");sfx("buy");render()}
+function upSpeed(){if(S.sp>=SPMAX||S.k<spCost())return;S.k-=spCost();S.sp++;say("Workers are faster now (level "+S.sp+").");sfx("buy");render()}
+function upSlots(){if(S.sl>=SLMAX||S.k<slCost())return;S.k-=slCost();S.sl++;say("You can run "+S.sl+" mines at once.");sfx("buy");render()}
+function hire(){if(S.wr>=WRMAX||S.k<wrCost())return;S.k-=wrCost();S.wr++;say("You hired a worker. You have "+S.wr+".");sfx("buy");render()}
+function buyMiner(){if(S.k<minerCost())return;S.k-=minerCost();S.m++;say("Turret online. It mines for you but burns "+DRAIN+" energy per second.");sfx("buy");render()}
+function buyTurret(){if(S.t>=TMAX||S.c<turCost())return;S.c-=turCost();S.t++;say("Turrets upgraded to level "+S.t+". They now mine "+(S.t*30)+"% faster.");sfx("buy");render()}
+function droneReward(){var r=Math.random(),t;
+ if(r<.45){var g=Math.round(Math.max(60,yieldNow()*3));gain(g);t="Golden drone! +"+fmt(g)+" credits"}
+ else if(r<.85){S.e+=150;t="Golden drone! +150 energy"}
+ else{S.k+=1;t="Golden drone! +1 coin"}
+ toast(t);sfx("mile");A.celebrate();say(t);miles();render()}
+var puz=null,pcv=$("pzc"),pc=pcv.getContext("2d"),PS=360,pd=Math.min(window.devicePixelRatio||1,2),DX=[0,1,0,-1],DY=[-1,0,1,0],pzRun=false;
+pcv.width=pcv.height=PS*pd;
+function rI(a,b){return a+Math.floor(Math.random()*(b-a+1))}
+function shuf(a){for(var i=a.length-1;i>0;i--){var j=rI(0,i),t=a[i];a[i]=a[j];a[j]=t}return a}
+function rot(m){return((m<<1)|(m>>3))&15}
+function mazeP(k){
+ var n=Math.min(30,10+Math.floor(k*2)),w=[],v=[],i,st=[0];
+ for(i=0;i<n*n;i++){w.push(0);v.push(0)}
+ v[0]=1;
+ while(st.length){var c0=st[st.length-1],x=c0%n,y=(c0/n)|0,nb=[],d;
+  for(d=0;d<4;d++){var nx=x+DX[d],ny=y+DY[d];if(nx>=0&&ny>=0&&nx<n&&ny<n&&!v[ny*n+nx])nb.push(d)}
+  if(!nb.length){st.pop();continue}
+  d=nb[rI(0,nb.length-1)];var c1=(y+DY[d])*n+x+DX[d];
+  w[c0]|=1<<d;w[c1]|=1<<((d+2)%4);v[c1]=1;st.push(c1)}
+ var dist={0:0},bq=[0],md=0,key=-1,cand=[];
+ while(bq.length){var bc=bq.shift(),bx=bc%n,by=(bc/n)|0;for(d=0;d<4;d++){if(w[bc]&(1<<d)){var b2=(by+DY[d])*n+bx+DX[d];if(dist[b2]===undefined){dist[b2]=dist[bc]+1;md=Math.max(md,dist[b2]);bq.push(b2)}}}}
+ var nk=k>=2?Math.min(4,1+Math.floor((k-1)/3)):0,keys=[];
+ for(i=1;i<n*n-1;i++)if(dist[i]>=md*.4)cand.push(i);
+ while(keys.length<nk&&cand.length){var pk=cand.splice(rI(0,cand.length-1),1)[0];if(keys.every(function(q){return Math.abs(q%n-pk%n)+Math.abs(((q/n)|0)-((pk/n)|0))>n/3}))keys.push(pk)}
+ var tm=12+Math.round(n*2.4)+keys.length*8;
+ return{t:"maze",n:n,w:w,px:0,py:0,seen:{0:1},vis:99,keys:keys,got:{},gn:0,tl:tm,tm:tm}}
+function fillP(p){var n=p.n,f={},q=[],i;
+ if(p.m[p.r0*n]&8){f[p.r0*n]=1;q.push([0,p.r0])}
+ while(q.length){var c=q.pop(),x=c[0],y=c[1],m=p.m[y*n+x];
+  for(var d=0;d<4;d++){if(!(m&(1<<d)))continue;var nx=x+DX[d],ny=y+DY[d];if(nx<0||ny<0||nx>=n||ny>=n)continue;
+   i=ny*n+nx;if(f[i])continue;if(p.m[i]&(1<<((d+2)%4))){f[i]=1;q.push([nx,ny])}}}
+ p.f=f;i=p.r1*n+n-1;return!!(f[i]&&(p.m[i]&2))}
+function pipeP(k){
+ var n=4+Math.min(4,Math.floor((k+1)*.8)),r0=rI(0,n-1),path,seen,steps,minLen,need=[],m=[],i;
+ function walk(x,y){
+  if(++steps>3000)return false;
+  path.push([x,y]);seen[y*n+x]=1;
+  if(x===n-1&&path.length>=minLen)return true;
+  var ds=shuf([0,1,2,3]);if(Math.random()<.5){ds.splice(ds.indexOf(1),1);ds.unshift(1)}
+  for(var q=0;q<4;q++){var d=ds[q],nx=x+DX[d],ny=y+DY[d];
+   if(nx<0||ny<0||nx>=n||ny>=n||seen[ny*n+nx])continue;
+   if(walk(nx,ny))return true}
+  path.pop();delete seen[y*n+x];return false}
+ for(minLen=n+Math.min(k,n);minLen>=n;minLen--){path=[];seen={};steps=0;if(walk(0,r0))break}
+ var L=path.length;
+ for(i=0;i<L;i++){var pt=path[i],a=i?path[i-1]:[-1,pt[1]],b=i<L-1?path[i+1]:[n,pt[1]],mk=0;
+  for(var d=0;d<4;d++){var qx=pt[0]+DX[d],qy=pt[1]+DY[d];if((qx===a[0]&&qy===a[1])||(qx===b[0]&&qy===b[1]))mk|=1<<d}
+  need[pt[1]*n+pt[0]]=mk}
+ var pool=k>=1?[5,3,7,3,5,0]:[5,3,5,3];
+ for(i=0;i<n*n;i++){var base=need[i]!==undefined?need[i]:pool[rI(0,pool.length-1)],rr=rI(0,3);while(rr--)base=rot(base);m.push(base)}
+ var mt=0;path.forEach(function(q){var ix=q[1]*n+q[0],x=m[ix],t=0;while(x!==need[ix]&&t<4){x=rot(x);t++}mt+=t<4?t:0});
+ var P={t:"pipe",n:n,m:m,r0:r0,r1:path[L-1][1],f:{},taps:mt+Math.max(3,14-2*k),tmax:mt+Math.max(3,14-2*k)},f0=path[0][1]*n+path[0][0];
+ if(fillP(P)){P.m[f0]=rot(P.m[f0]);fillP(P)}
+ return P}
+function drawMaze(){var p=puz,n=p.n,cs=PS/n,g=pc,x,y,d;g.setTransform(pd,0,0,pd,0,0);
+ g.fillStyle="#0c1017";g.fillRect(0,0,PS,PS);g.lineCap="round";g.lineWidth=2;
+ for(y=0;y<n;y++)for(x=0;x<n;x++){var near=Math.max(Math.abs(x-p.px),Math.abs(y-p.py))<=p.vis;if(!near&&!p.seen[y*n+x])continue;
+  g.fillStyle=near?"#1c2735":"#141b26";g.fillRect(x*cs,y*cs,cs,cs);g.strokeStyle=near?"#4fd1c5":"#2e5a60";
+  for(d=0;d<4;d++)if(!(p.w[y*n+x]&(1<<d))){var X=x*cs,Y=y*cs;g.beginPath();
+   if(d===0){g.moveTo(X,Y);g.lineTo(X+cs,Y)}else if(d===1){g.moveTo(X+cs,Y);g.lineTo(X+cs,Y+cs)}else if(d===2){g.moveTo(X,Y+cs);g.lineTo(X+cs,Y+cs)}else{g.moveTo(X,Y);g.lineTo(X,Y+cs)}g.stroke()}}
+ var ex=(n-1)*cs,pu=.6+.4*Math.sin(performance.now()/250);
+ var lock=p.gn<p.keys.length,ec=lock?"255,122,122":"242,184,75";g.fillStyle="rgba("+ec+","+pu+")";g.shadowColor="rgb("+ec+")";g.shadowBlur=12;g.fillRect(ex+cs*.2,ex+cs*.2,cs*.6,cs*.6);g.shadowBlur=0;
+ p.keys.forEach(function(kc){if(p.got[kc])return;var kx=kc%n,ky=(kc/n)|0;g.fillStyle="#4fd1c5";g.shadowColor="#4fd1c5";g.shadowBlur=12;g.beginPath();g.arc((kx+.5)*cs,(ky+.5)*cs,cs*.22,0,Math.PI*2);g.fill();g.shadowBlur=0});
+ var cx=(p.px+.5)*cs,cy=(p.py+.5)*cs;g.fillStyle="#f2b84b";g.beginPath();g.arc(cx,cy,cs*.3,0,Math.PI*2);g.fill();g.fillStyle="#fff";g.fillRect(cx+cs*.08,cy-cs*.12,cs*.1,cs*.1);
+ g.fillStyle=p.tl/p.tm<.25?"#ff7a7a":"#4fd1c5";g.fillRect(0,PS-5,PS*Math.max(0,p.tl)/p.tm,5)}
+function drawPipes(){var p=puz,n=p.n,cs=PS/n,g=pc,x,y,d;g.setTransform(pd,0,0,pd,0,0);
+ g.fillStyle="#0c1017";g.fillRect(0,0,PS,PS);g.lineCap="round";
+ for(y=0;y<n;y++)for(x=0;x<n;x++){var i=y*n+x,m=p.m[i],on=p.f[i],cx=(x+.5)*cs,cy=(y+.5)*cs;
+  g.fillStyle="#1c2735";g.fillRect(x*cs+2,y*cs+2,cs-4,cs-4);
+  g.strokeStyle=on?"#4fd1c5":"#5b6b7f";g.lineWidth=cs*.2;if(on){g.shadowColor="#4fd1c5";g.shadowBlur=10}
+  for(d=0;d<4;d++)if(m&(1<<d)){g.beginPath();g.moveTo(cx,cy);g.lineTo(cx+DX[d]*cs*.5,cy+DY[d]*cs*.5);g.stroke()}
+  g.shadowBlur=0}
+ g.fillStyle="#4ade80";g.fillRect(0,(p.r0+.5)*cs-5,7,10);g.fillStyle="#f2b84b";g.fillRect(PS-7,(p.r1+.5)*cs-5,7,10)}
+function drawP(){if(!puz)return;puz.t==="maze"?drawMaze():drawPipes()}
+var pzLast=0;
+function pzLoop(){if(!puz){pzRun=false;return}
+ var now=performance.now(),dt=Math.min(.1,(now-pzLast)/1000);pzLast=now;
+ if(puz.t==="maze"){var s0=Math.ceil(puz.tl);puz.tl-=dt;
+  if(puz.tl<=0){failP("Time is up!");requestAnimationFrame(pzLoop);return}
+  if(Math.ceil(puz.tl)!==s0)$("pzn").textContent="Time left: "+Math.ceil(puz.tl)+"s. If time runs out you lose 30 energy."}
+ drawP();requestAnimationFrame(pzLoop)}
+function newP(){var n=S.pn;puz=n%2?pipeP(n>>1):mazeP(n>>1)}
+function showP(){var m=puz.t==="maze";pzLast=performance.now();
+ $("pzl").hidden=false;$("pzt").textContent="Puzzle "+(S.pn+1)+": "+(m?"Maze":"Fix the Path");
+ $("pzq").textContent=m?"Guide the miner to the gold exit. Tap the maze, use the arrow buttons, or press the arrow keys."+(puz.vis<99?" It is dark, so you can only see nearby.":"")+(puz.keys.length?" Collect all "+puz.keys.length+" glowing key"+(puz.keys.length>1?"s":"")+" to unlock the red exit.":""):"Tap pipes to rotate them. Connect the green entrance on the left to the gold exit on the right.";
+ $("pzd").hidden=!m;$("pzn").textContent=m?"Time left: "+Math.ceil(puz.tl)+"s. If time runs out you lose 30 energy.":"Taps left: "+puz.taps+". If you run out you lose 30 energy.";
+ if(!pzRun){pzRun=true;pzLoop()};updSkip()}
+function openPuzzle(){newP();showP()}
+function solveP(){if(!puz)return;
+ var fr=puz.t==="maze"?Math.max(0,puz.tl)/puz.tm:Math.max(0,Math.min(1,puz.taps/puz.tmax)),base=Math.min(900,50+20*S.pn)+Math.round(yieldNow()*Math.min(30,2+S.pn*.3)),bn=Math.round(base*fr*.6),g=base+bn;
+ gain(g);S.pn++;S.nx+=100;if(S.nx<=S.spent)S.nx=S.spent+100;puz=null;$("pzl").hidden=true;
+ toast("Puzzle solved! +"+g+" credits"+(bn?" (speed bonus +"+bn+")":""));sfx("mile");buzz([30,20,30]);A.celebrate();say("Puzzle solved: +"+g+" credits.");miles();render()}
+function failP(why){var m=puz&&puz.t==="maze";S.e=Math.max(0,S.e-30);sfx("no");buzz(120);
+ puz=m?pipeP(S.pn>>1):mazeP(S.pn>>1);showP();$("pzn").textContent=(why||"Failed!")+" -30 energy. Here is a different puzzle.";render()}
+function mv(d){var p=puz;if(!p||p.t!=="maze")return;
+ if(!(p.w[p.py*p.n+p.px]&(1<<d))){sfx("no");return}
+ p.px+=DX[d];p.py+=DY[d];var ci=p.py*p.n+p.px;p.seen[ci]=1;sfx("hit");
+ if(p.keys.indexOf(ci)>=0&&!p.got[ci]){p.got[ci]=1;p.gn++;sfx("coin");$("pzn").textContent="Key collected ("+p.gn+"/"+p.keys.length+")!"}
+ if(ci===p.n*p.n-1){if(p.gn<p.keys.length){sfx("no");$("pzn").textContent="The exit is locked. Collect all "+p.keys.length+" keys first!"}else solveP()}}
+function ptap(e){if(!puz)return;var b=pcv.getBoundingClientRect(),x=(e.clientX-b.left)*PS/b.width,y=(e.clientY-b.top)*PS/b.height,p=puz,cs=PS/p.n;
+ if(p.t==="maze"){var dx=x-(p.px+.5)*cs,dy=y-(p.py+.5)*cs;mv(Math.abs(dx)>Math.abs(dy)?(dx>0?1:3):(dy>0?2:0))}
+ else{var cx=Math.floor(x/cs),cy=Math.floor(y/cs);if(cx<0||cy<0||cx>=p.n||cy>=p.n)return;
+  var i=cy*p.n+cx;p.m[i]=rot(p.m[i]);p.taps--;sfx("hit");if(fillP(p))solveP();else if(p.taps<=0)failP("Out of taps!");else $("pzn").textContent="Taps left: "+p.taps+". If you run out you lose 30 energy."}}
+
+var ACH=[{n:"Send your first worker",t:function(){return S.tc>=1}},{n:"Complete 50 trips",t:function(){return S.tc>=50}},{n:"Hire 3 workers",t:function(){return S.wr>=3}},{n:"Run 3 mines at once",t:function(){return S.sl>=3}},{n:"Build a turret",t:function(){return S.m>=1}},{n:"Solve 5 puzzles",t:function(){return S.pn>=5}},{n:"Reach mine level 10",t:function(){return S.L>=10}},{n:"Unlock 10 mines",t:function(){return nUn()>=10}},{n:"Earn 1,000,000 credits",t:function(){return S.earned>=1e6}},{n:"Solve 15 puzzles",t:function(){return S.pn>=15}},{n:"Unlock 50 mines",t:function(){return nUn()>=50}}];
+function achs(){ACH.forEach(function(a,i){if(!S.ac[i]&&a.t()){S.ac[i]=1;S.k+=1;toast("Achievement: "+a.n+" (+1 coin)");sfx("mile");A.celebrate();say("Achievement unlocked: "+a.n+".")}})}
+var AB=[
+{id:"en",n:"Auto Energy",cost:5,d:"When your energy drops below the trigger, spends a set amount of credits on energy every second.",p1:"Trigger when energy is below",v1:100,p2:"Credits to spend each time",v2:50},
+{id:"up",n:"Auto Mine Upgrader",cost:30,d:"Raises your mine level whenever you have enough coins above the amount you keep.",p1:"Coins to keep",v1:0},
+{id:"sp",n:"Auto Speed Upgrader",cost:40,d:"Makes your workers faster whenever you have spare coins.",p1:"Coins to keep",v1:0},
+{id:"sl",n:"Auto Slot Upgrader",cost:60,d:"Raises how many mines you can run at once when you have spare coins.",p1:"Coins to keep",v1:0},
+{id:"wr",n:"Auto Worker Hirer",cost:60,d:"Hires workers when you have spare coins.",p1:"Coins to keep",v1:0},
+{id:"tu",n:"Auto Turret Buyer",cost:80,d:"Buys turrets when you have spare coins.",p1:"Coins to keep",v1:0,p2:"Stop at this many turrets",v2:20},
+{id:"tg",n:"Auto Turret Upgrader",cost:100,d:"Upgrades your turrets with credits above the amount you keep.",p1:"Credits to keep",v1:1000},
+{id:"mi",n:"Auto Mine Unlocker",cost:200,d:"Unlocks the next mine as soon as you can afford it, keeping some coins back.",p1:"Coins to keep",v1:0}];
+function initAB(){S.ab=S.ab||{};S.al=S.al||0;if(S.ao===undefined)S.ao=1;if(S.res===undefined)S.res=60;AB.forEach(function(a){if(!S.ab[a.id])S.ab[a.id]={own:0,on:0,v1:a.v1,v2:a.v2||0}})}
+initAB();
+function adCost(){return Math.ceil(8*Math.pow(1.8,S.al))}
+function buyAD(){if(S.al>=10||S.k<adCost())return;S.k-=adCost();S.al++;if(S.al===1)S.ao=1;toast("Auto-Dispatcher level "+S.al+"!");sfx("buy");render()}
+function buildAuto(){
+ var h='<section><h2>Auto-Dispatcher</h2><p class="note">An autominer that sends your workers out for you. Each level lets it keep one more mine fully staffed (up to 5 workers each), always picking your best mines. It keeps your energy reserve.</p><div class="row" style="margin-top:8px"><button id="as_up"></button><button id="as_tg"></button></div><p class="note" id="as_info"></p></section>';
+ AB.forEach(function(a){h+='<section><h2>'+a.n+'</h2><p class="note">'+a.d+'</p><div class="row" style="margin:8px 0"><button id="abb_'+a.id+'"></button></div><div class="row" id="abp_'+a.id+'"><label>'+a.p1+' <input type="number" min="0" id="ab1_'+a.id+'"></label>'+(a.p2?'<label>'+a.p2+' <input type="number" min="0" id="ab2_'+a.id+'"></label>':'')+'</div></section>'});
+ $("autobody").innerHTML=h;
+ $("as_up").onclick=buyAD;$("as_tg").onclick=function(){S.ao=S.ao?0:1;sfx("buy");render()};
+ AB.forEach(function(a){
+  $("abb_"+a.id).onclick=function(){var o=S.ab[a.id];if(!o.own){if(S.k<a.cost)return;S.k-=a.cost;o.own=1;o.on=1;toast(a.n+" bought!");sfx("mile");A.celebrate()}else{o.on=o.on?0:1;sfx("buy")}render()};
+  $("ab1_"+a.id).onchange=function(){S.ab[a.id].v1=Math.max(0,Math.floor(+this.value)||0)};
+  if(a.p2)$("ab2_"+a.id).onchange=function(){S.ab[a.id].v2=Math.max(0,Math.floor(+this.value)||0)}})}
+function autos(){var a=S.ab,x,q,n;
+ x=a.en;if(x.on&&x.own&&S.e<x.v1&&S.c>=1){n=Math.min(Math.floor(S.c),x.v2||1);S.c-=n;S.e+=n*RATE}
+ x=a.up;if(x.on&&x.own)for(q=0;q<5&&S.L<MAXL&&S.k-x.v1>=upCost();q++){S.k-=upCost();S.L++}
+ x=a.sp;if(x.on&&x.own)for(q=0;q<5&&S.sp<SPMAX&&S.k-x.v1>=spCost();q++){S.k-=spCost();S.sp++}
+ x=a.sl;if(x.on&&x.own)for(q=0;q<3&&S.sl<SLMAX&&S.k-x.v1>=slCost();q++){S.k-=slCost();S.sl++}
+ x=a.wr;if(x.on&&x.own)for(q=0;q<3&&S.wr<WRMAX&&S.k-x.v1>=wrCost();q++){S.k-=wrCost();S.wr++}
+ x=a.tu;if(x.on&&x.own)for(q=0;q<5&&S.m<x.v2&&S.k-x.v1>=minerCost();q++){S.k-=minerCost();S.m++}
+ x=a.tg;if(x.on&&x.own)for(q=0;q<5&&S.t<TMAX&&S.c-x.v1>=turCost();q++){S.c-=turCost();S.t++}
+ x=a.mi;if(x.on&&x.own){var nm=-1,k2;for(k2=0;k2<100;k2++)if(!S.un[k2]){nm=k2;break}
+  if(nm>-1&&canUnlock(nm)&&S.k-x.v1>=MINES[nm].cost){S.k-=MINES[nm].cost;S.un[nm]=1;toast(MINES[nm].n+" unlocked!");sfx("mile");A.celebrate()}}}
+function hintText(){
+ if(puz)return"Solve the puzzle to keep mining.";
+ if(S.e<tripCost(0)&&S.c<1)return"Out of energy and credits. Use the emergency generator on the Base tab.";
+ if(S.e<tripCost(0))return"Out of energy. Buy more in the Shop.";
+ if(S.tc<1)return"Tap Send workers on the Base tab, or open Mines and send a worker to the Copper Pit.";
+ if(S.c>=COIN)return"You have enough credits for a coin. Make one in the Shop.";
+ if(S.wr<2&&S.k>=wrCost())return"You can hire a second worker in Upgrades.";
+ if(S.sl<2&&S.wr>=2&&S.k>=slCost())return"Upgrade Mines at once so you can work two different mines together.";
+ if(S.L<MAXL&&S.k>=upCost())return"Upgrade your mine level in Upgrades. Every trip pays more.";
+ if(S.sp<SPMAX&&S.k>=spCost())return"You can make your workers faster in Upgrades.";
+ if(S.m<1&&S.k>=minerCost())return"Buy a turret in Upgrades. It mines for you.";
+ var ab0=null;AB.forEach(function(a){if(!ab0&&!S.ab[a.id].own&&S.k>=a.cost)ab0=a});if(ab0)return"You can buy the "+ab0.n+" in the Auto tab.";
+ var nm=-1;MINES.forEach(function(m,i){if(nm<0&&!S.un[i])nm=i});
+ if(nm>-1&&S.L<MINES[nm].lv)return"Goal: reach mine level "+MINES[nm].lv+" to unlock the "+MINES[nm].n+".";
+ if(nm>-1&&S.k<MINES[nm].cost)return"Goal: save "+fmt(MINES[nm].cost)+" coins to unlock the "+MINES[nm].n+".";
+ if(nm>-1)return"You can unlock the "+MINES[nm].n+" in Mines.";
+ return"Keep mining!"}
+function skipCost(){var c=Math.ceil(40+5*S.pn+yieldNow()*2);return{c:c,e:Math.ceil(c*2.5),k:Math.max(1,Math.ceil(c/(COIN*3)))}}
+function updSkip(){var q=skipCost();$("sk_e").textContent="Skip: "+fmt(q.e)+" energy";$("sk_c").textContent="Skip: "+fmt(q.c)+" credits";$("sk_k").textContent="Skip: "+fmt(q.k)+" coin"+(q.k>1?"s":"");
+ $("sk_e").disabled=S.e<q.e;$("sk_c").disabled=S.c<q.c;$("sk_k").disabled=S.k<q.k}
+function skipP(w){if(!puz)return;var q=skipCost();
+ if(w==="e"){if(S.e<q.e)return;S.e-=q.e}else if(w==="c"){if(S.c<q.c)return;S.c-=q.c}else{if(S.k<q.k)return;S.k-=q.k}
+ puz=null;$("pzl").hidden=true;S.nx+=100;if(S.nx<=S.spent)S.nx=S.spent+100;toast("Puzzle skipped");sfx("buy");say("You skipped a puzzle.");render()}
+function pause(){if(S.m<1)return;S.pz=S.pz?0:1;say(S.pz?"Turrets paused. They use no energy.":"Turrets resumed.");sfx("buy");render()}
+function genny(){if(S.e<tripCost(0)&&S.c<10){S.e+=60;say("Generator coughs to life: +60 energy.");render()}}
+function tick(){S.age++;
+ var on=false,run=S.m>0&&!S.pz&&!puz;
+ if(run){var yy=yieldNow();for(var i=0;i<S.m;i++){if(S.e>=DRAIN+S.res){S.e-=DRAIN;S.spent+=DRAIN;on=true;gain(0.1*yy*(1+0.3*S.t))}}}
+ A.fire(on);
+ if(!puz){autos();autoDispatch()}
+ if(!puz&&S.spent>=S.nx)openPuzzle();
+ miles();achs();
+ if(!S.won&&S.un[99]){S.won=1;$("win").hidden=false}
+ if(S.age%3===0)save();
+ render()}
+function why(i){var ld=mineLoad(i);
+ if(puz)return"Solve the puzzle first";
+ if(ld>=PERMINE)return"Station full ("+PERMINE+"/"+PERMINE+")";
+ if(S.tr.length>=S.wr)return"No free worker";
+ if(ld===0&&activeMines()>=S.sl)return"No free mine slot";
+ if(S.e<tripCost(i))return"Need "+tripCost(i)+" energy";
+ return ld>0?"Add worker ("+ld+"/"+PERMINE+")":"Send worker"}
+function render(){
+ bump("cr",S.c,prev.c);bump("en",S.e,prev.e);bump("co",S.k,prev.k);$("en").classList.toggle("low",S.e<tripCost(0)*2);
+ $("en").firstChild.textContent=fmt(S.e);$("cr").firstChild.textContent=fmt(S.c);$("co").firstChild.textContent=fmt(S.k);
+ $("prog").style.width=Math.min(100,nUn())+"%";
+ ["","2"].forEach(function(z){$("chw"+z).textContent="Workers: "+(S.wr-S.tr.length)+" free of "+S.wr;$("chs"+z).textContent="Mines in use: "+activeMines()+" of "+S.sl;$("chv"+z).textContent="Trip time: "+tripTime(S.last).toFixed(1)+"s"});
+ $("crew").disabled=!anySend();$("gen").hidden=!(S.e<tripCost(0)&&S.c<10);
+ $("pz").textContent=S.pz?"Resume turrets (P)":"Pause turrets (P)";$("pz").disabled=S.m<1;$("rs").textContent="Energy reserve: "+S.res;
+ $("tinfo").textContent=(S.m<1?"No turrets yet. Buy one in Upgrades.":S.pz?"Turrets paused. They use no energy.":"Running "+S.m+" turret"+(S.m>1?"s":"")+".")+" Next puzzle in "+fmt(Math.max(0,S.nx-S.spent))+" energy.";
+ $("mreg").textContent=REG[mp]+": mines "+(mp*10+1)+" to "+(mp*10+10);
+ for(var mj=0;mj<10;mj++){var mi=mp*10+mj,mm=MINES[mi],mb=$("mb"+mj);$("mn"+mj).textContent=(mi+1)+". "+mm.n;
+  $("md"+mj).textContent="Pays "+fmt(yieldOf(mi))+" per trip | "+tripTime(mi).toFixed(1)+"s | "+tripCost(mi)+" energy | "+Math.round(mm.gem*100)+"% gems"+(S.un[mi]?"":" | Needs mine level "+mm.lv);
+  $("mt"+mj).textContent=S.un[mi]?"Workers here: "+mineLoad(mi)+"/"+PERMINE:"Locked";
+  if(S.un[mi]){mb.textContent=why(mi);mb.disabled=!canSend(mi);mb.classList.toggle("ready",false)}
+  else{mb.textContent=(mi>0&&!S.un[mi-1])?"Unlock the previous mine first":S.L<mm.lv?"Needs mine level "+mm.lv:"Unlock ("+fmt(mm.cost)+" coins)";mb.disabled=!canUnlock(mi);mb.classList.toggle("ready",canUnlock(mi))}}
+ for(var mq=0;mq<10;mq++){var any=false;for(var m3=0;m3<10;m3++)if(canUnlock(mq*10+m3))any=true;$("mp"+mq).classList.toggle("on",mq===mp);$("mp"+mq).classList.toggle("ready",any&&mq!==mp)}
+
+ var wpages=Math.max(1,Math.ceil(S.wr/10));if(wpg>=wpages)wpg=wpages-1;
+ $("wsum").textContent=S.wr+" worker"+(S.wr>1?"s":"")+": "+S.tr.length+" working, "+(S.wr-S.tr.length)+" idle. Each mine fits up to "+PERMINE+" workers.";
+ for(var wj=0;wj<5;wj++){$("wp"+wj).hidden=wj>=wpages;$("wp"+wj).classList.toggle("on",wj===wpg)}
+ for(var wi=0;wi<10;wi++){var wk=wpg*10+wi,wrw=$("wr"+wi);wrw.hidden=wk>=S.wr;if(wk>=S.wr)continue;
+  var wt=tripOf(wk);$("wn"+wi).textContent="Worker "+(wk+1);
+  $("ws"+wi).textContent=wt?"Mining: "+MINES[wt.i].n+" ("+Math.max(0,Math.ceil((wt.s+wt.d*1000-Date.now())/1000))+"s left)":"Idle";
+  $("wb"+wi).textContent=wt?"Working...":"Send to best mine";$("wb"+wi).disabled=!!wt||!anySend()}
+ var lm=MINES[S.last];
+ $("ui_m").textContent="Level "+S.L+" of "+MAXL+". Each level adds 5 ore to every trip. The "+lm.n+" now pays "+fmt(yieldOf(S.last))+" per trip.";
+ $("upm").textContent=S.L>=MAXL?"Maxed":"Level "+(S.L+1)+" ("+fmt(upCost())+" coins)";$("upm").disabled=S.L>=MAXL||S.k<upCost();
+ $("ui_s").textContent="Level "+S.sp+" of "+SPMAX+". A trip to the "+lm.n+" takes "+tripTime(S.last).toFixed(2)+"s.";
+ $("upsp").textContent=S.sp>=SPMAX?"Maxed":"Faster ("+fmt(spCost())+" coins)";$("upsp").disabled=S.sp>=SPMAX||S.k<spCost();
+ $("ui_l").textContent="You can run "+S.sl+" mine"+(S.sl>1?"s":"")+" at once (max "+SLMAX+"). Each mine fits up to "+PERMINE+" workers, but you can only work this many different mines together.";
+ $("upsl").textContent=S.sl>=SLMAX?"Maxed":"Add a slot ("+fmt(slCost())+" coins)";$("upsl").disabled=S.sl>=SLMAX||S.k<slCost();
+ $("ui_w").textContent="You have "+S.wr+" worker"+(S.wr>1?"s":"")+" (max "+WRMAX+"). A worker does one trip at a time, and each mine fits "+PERMINE+" workers.";
+ $("upwr").textContent=S.wr>=WRMAX?"Maxed":"Hire ("+fmt(wrCost())+" coins)";$("upwr").disabled=S.wr>=WRMAX||S.k<wrCost();
+ $("ui_t").textContent="Turrets: "+S.m+". Each mines on its own and uses "+DRAIN+" energy per second.";
+ $("bym").textContent="Buy turret ("+fmt(minerCost())+" coins)";$("bym").disabled=S.k<minerCost();
+ $("ui_tl").textContent="Level "+S.t+" of "+TMAX+". Each level makes every turret mine 30% faster.";
+ $("tur").textContent=S.t>=TMAX?"Maxed":"Upgrade ("+fmt(turCost())+" credits)";$("tur").disabled=S.t>=TMAX||S.c<turCost();
+ ["upm","upsp","upsl","upwr","bym","tur"].forEach(function(q){$(q).classList.toggle("ready",!$(q).disabled)});
+ $("be10").disabled=S.c<10;$("bemax").disabled=S.c<1;$("cc1").disabled=S.c<COIN;$("ccmax").disabled=S.c<COIN;
+ AB.forEach(function(a){var o=S.ab[a.id],b=$("abb_"+a.id),i1=$("ab1_"+a.id);
+  b.textContent=o.own?(o.on?"ON (tap to turn off)":"OFF (tap to turn on)"):"Buy ("+fmt(a.cost)+" coins)";b.disabled=!o.own&&S.k<a.cost;b.classList.toggle("ready",!o.own&&!b.disabled);
+  $("abp_"+a.id).hidden=!o.own;if(document.activeElement!==i1)i1.value=o.v1;if(a.p2){var i2=$("ab2_"+a.id);if(document.activeElement!==i2)i2.value=o.v2}});
+ $("as_up").textContent=S.al>=10?"Auto-Dispatcher maxed":"Upgrade Auto-Dispatcher to level "+(S.al+1)+" ("+fmt(adCost())+" coins)";$("as_up").disabled=S.al>=10||S.k<adCost();$("as_up").classList.toggle("ready",!$("as_up").disabled);
+ $("as_tg").hidden=S.al<1;$("as_tg").textContent=S.ao?"Auto-Dispatcher: ON":"Auto-Dispatcher: OFF";
+ $("as_info").textContent=S.al<1?"Not owned yet.":"Level "+S.al+": keeps up to "+S.al+" mine"+(S.al>1?"s":"")+" running automatically.";
+ var rows=[["Time played",Math.floor(S.age/60)+"m "+S.age%60+"s"],["Credits earned",fmt(S.earned)],["Trips completed",fmt(S.tc)],["Mines unlocked",nUn()+"/100"],["Mine level",S.L],["Workers",S.wr],["Mines at once",S.sl],["Worker speed level",S.sp],["Turrets",S.m+" (level "+S.t+")"],["Auto-Dispatcher level",S.al],["Puzzles solved",S.pn],["Next puzzle in",fmt(Math.max(0,S.nx-S.spent))+" energy"]];
+ ACH.forEach(function(a,i){rows.push([(S.ac[i]?"\u2713 ":"\u25a1 ")+a.n,S.ac[i]?"+1 coin":""])});
+ $("statsbody").innerHTML=rows.map(function(q){return"<div class=srow><span>"+q[0]+"</span><b>"+q[1]+"</b></div>"}).join("");
+ $("t-mines").classList.toggle("ready",MINES.some(function(m,i){return canUnlock(i)}));
+ $("t-up").classList.toggle("ready",["upm","upsp","upsl","upwr","bym","tur"].some(function(q){return !$(q).disabled}));
+ $("t-auto").classList.toggle("ready",AB.some(function(a){return !S.ab[a.id].own&&S.k>=a.cost})||(S.al<10&&S.k>=adCost()));
+ $("t-shop").classList.toggle("ready",S.c>=COIN);
+ $("hint").textContent=hintText();
+ if(puz)updSkip();
+ prev.c=S.c;prev.e=S.e;prev.k=S.k;
+ if(S.won)$("win").hidden=false}
+function updTrips(){var now=Date.now(),j,q,i,w,t;
+ if(!$("p-mines").hidden)for(j=0;j<10;j++){i=mp*10+j;w=0;for(q=0;q<S.tr.length;q++)if(S.tr[q].i===i)w=Math.max(w,Math.min(100,(now-S.tr[q].s)/(S.tr[q].d*10)));$("mf"+j).style.width=w+"%"}
+ if(!$("p-work").hidden)for(j=0;j<10;j++){t=tripOf(wpg*10+j);$("wf"+j).style.width=t?Math.min(100,(now-t.s)/(t.d*10))+"%":"0%"}}
+$("crew").onclick=sendCrew;
+[0,1,2,3,4].forEach(function(j){$("wp"+j).onclick=function(){wpg=j;render()}});
+[0,1,2,3,4,5,6,7,8,9].forEach(function(j){$("wb"+j).onclick=function(){sendWorker(wpg*10+j)}});
+$("be10").onclick=function(){buyEnergy(10)};$("bemax").onclick=function(){buyEnergy(Infinity)};
+$("cc1").onclick=function(){makeCoins(1)};$("ccmax").onclick=function(){makeCoins(Infinity)};
+$("upm").onclick=upMine;$("upsp").onclick=upSpeed;$("upsl").onclick=upSlots;$("upwr").onclick=hire;$("bym").onclick=buyMiner;$("tur").onclick=buyTurret;
+$("gen").onclick=genny;$("pz").onclick=pause;
+$("sk_e").onclick=function(){skipP("e")};$("sk_c").onclick=function(){skipP("c")};$("sk_k").onclick=function(){skipP("k")};
+$("rs").onclick=function(){var RS=[0,60,150,300,600];S.res=RS[(RS.indexOf(S.res)+1)%RS.length];say("Turrets and the dispatcher keep "+S.res+" energy in reserve.");sfx("buy");render()};
+[["dN",0],["dE",1],["dS",2],["dW",3]].forEach(function(q){$(q[0]).onclick=function(){mv(q[1])}});
+$("dR").onclick=function(){if(puz&&puz.t==="maze"){puz.px=0;puz.py=0}};
+pcv.addEventListener("pointerdown",ptap);
+document.addEventListener("keydown",function(e){if(!puz||puz.t!=="maze")return;var d={ArrowUp:0,KeyW:0,ArrowRight:1,KeyD:1,ArrowDown:2,KeyS:2,ArrowLeft:3,KeyA:3}[e.code];if(d!==undefined){e.preventDefault();mv(d)}});
+$("introb").onclick=function(){$("intro").hidden=true;try{localStorage.setItem("oaIntro","1")}catch(x){}};
+$("howto").onclick=function(){$("intro").hidden=false};
+[0,1,2,3,4,5,6,7,8,9].forEach(function(j){$("mb"+j).onclick=function(){var i=mp*10+j;if(S.un[i]){send(i,false);render()}else unlock(i)};$("mp"+j).onclick=function(){mp=j;render()}});
+var PG=["mine","mines","work","up","auto","shop","stats"];
+PG.forEach(function(k){$("t-"+k).onclick=function(){
+ var h=k==="mines"?$("host2"):$("host1");if($("scene").parentNode!==h)h.appendChild($("scene"));
+ PG.forEach(function(q){$("p-"+q).hidden=q!==k;$("t-"+q).classList.toggle("on",q===k)});window.scrollTo(0,0)}});
+$("acct").onclick=function(){if(USER){save();try{sessionStorage.removeItem("oa_user")}catch(x){}location.reload()}else window.openAuth()};
+$("snd").onclick=function(){muted=!muted;this.textContent="Sound: "+(muted?"off":"on")};
+$("reset").onclick=function(){if(confirm("Erase your progress and start over?")){S=fresh();initAB();puz=null;$("pzl").hidden=true;$("win").hidden=true;save();say("New game. Good luck!");render()}};
+var A=(function(){
+ var cv=$("scene"),c=cv.getContext("2d"),W=720,H=260,GY=200,HOMEX=76,MINEX=590,RX=648,RY=GY-22,PI=Math.PI,rnd=Math.random,i;
+ var dpr=Math.min(window.devicePixelRatio||1,2);cv.width=W*dpr;cv.height=H*dpr;
+ var calm=window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches;
+ var fl=[],sh=[],sp=[],cn=[],ch=[],sm=[],stars=[],peb=[],kick=0,shk=0,flash=0,cmb=0,cmbT=0,ring=0,smT=0,T=0,last=performance.now(),drone=null,droneT=15,lastTh=-1;
+ for(i=0;i<60;i++)stars.push({x:rnd()*W,y:rnd()*120,r:rnd()*1.4+.4,p:rnd()*6});
+ for(i=0;i<46;i++)peb.push({x:rnd()*W,y:GY+8+rnd()*(H-GY-14),w:2+rnd()*5});
+ var TH=[
+{sky:["#080d1a","#1a2c47","#2f4a66"],m1:"#16233a",m2:"#1d2e48",hill:"#243349",gr:["#2a384c","#121922"],cave:"79,209,197",c1:"79,209,197",c2:"199,146,234",rk:["#76849a","#3a4454"],vein:"#f2c75c",vg:"255,200,80",chip:"#7a8798",gem:["#d4faff","#2aa6c9","#5fd6ee","#7a8cff","79,209,247"],amb:"fly"},
+{sky:["#0a1020","#1f3350","#4a6a8c"],m1:"#1a2a42",m2:"#243955",hill:"#2c4160",gr:["#33465e","#16202c"],cave:"150,180,255",c1:"150,180,255",c2:"220,235,255",rk:["#93a7c2","#46566e"],vein:"#e8f0ff",vg:"220,235,255",chip:"#9aaac0",gem:["#d4faff","#2aa6c9","#5fd6ee","#7a8cff","79,209,247"],amb:"fly"},
+{sky:["#0c0a1e","#251a4a","#4a2f78"],m1:"#1d1840",m2:"#2a2058",hill:"#33286a",gr:["#2c2a52","#12102a"],cave:"199,146,234",c1:"199,146,234",c2:"79,209,197",rk:["#7a6aa6","#3b2f5c"],vein:"#e6a8ff",vg:"230,160,255",chip:"#8a7ab8",gem:["#f2d8ff","#9a45d8","#c792ea","#6a7bff","190,120,255"],amb:"fly"},
+{sky:["#1a0a08","#4a1810","#a8421c"],m1:"#2a120e",m2:"#3a1a12",hill:"#4a2218",gr:["#4a2a20","#1a0c08"],cave:"255,120,60",c1:"255,140,60",c2:"255,200,80",rk:["#a5543a","#4a1f1a"],vein:"#ffb347",vg:"255,170,60",chip:"#a5543a",gem:["#fff0c0","#ff6a2a","#ffa040","#ff4a3a","255,120,50"],amb:"ember"},
+{sky:["#06101c","#14385a","#5aa0c8"],m1:"#1c3a58",m2:"#2a5578",hill:"#3a6e94",gr:["#5a8aaa","#1c3448"],cave:"150,230,255",c1:"150,230,255",c2:"255,255,255",rk:["#a9d4e8","#3f6a85"],vein:"#ffffff",vg:"255,255,255",chip:"#b5dcee",gem:["#ffffff","#58c8f0","#a0e8ff","#80b0ff","130,220,255"],amb:"snow"},
+{sky:["#04020c","#160a30","#3a1a5a"],m1:"#120a24",m2:"#1a1034",hill:"#221444",gr:["#201236","#0a0614"],cave:"220,90,255",c1:"255,106,213",c2:"160,100,255",rk:["#5a3a8a","#1a1030"],vein:"#ff6ad5",vg:"255,100,220",chip:"#6a4a9a",gem:["#ffd0ff","#a020d0","#e060ff","#5030ff","200,80,255"],amb:"void"}],Q=TH[0],am=[],fade=0,star=null,starT=6,hold=0;
+ for(i=0;i<50;i++)am.push({x:rnd()*W,y:rnd()*GY,v:rnd(),p:rnd()*6});
+ function rgb3(h,s,l){h=((h%360)+360)%360;s/=100;l/=100;var a=s*Math.min(l,1-l);function f(n){var k=(n+h/30)%12;return Math.round(255*(l-a*Math.max(-1,Math.min(k-3,9-k,1))))}return[f(0),f(8),f(4)]}
+ function hex(h,s,l){return"#"+rgb3(h,s,l).map(function(x){return(x<16?"0":"")+x.toString(16)}).join("")}
+ function rs(h,s,l){return rgb3(h,s,l).join(",")}
+ function mk(h,amb){return{sky:[hex(h,50,5),hex(h,45,16),hex(h,40,32)],m1:hex(h,40,14),m2:hex(h,38,19),hill:hex(h,35,24),gr:[hex(h,30,26),hex(h,35,8)],cave:rs(h+30,80,60),c1:rs(h,80,60),c2:rs(h+60,70,65),rk:[hex(h,18,52),hex(h,25,22)],vein:hex(h+20,80,70),vg:rs(h+20,90,65),chip:hex(h,15,50),gem:[hex(h+180,80,88),hex(h+180,70,45),hex(h+180,70,65),hex(h+220,70,60),rs(h+180,80,60)],amb:amb}}
+ [[125,"fly"],[32,"ember"],[205,"snow"],[330,"fly"],[170,"void"],[85,"fly"],[255,"snow"],[20,"ember"],[0,"void"]].forEach(function(q){TH.push(mk(q[0],q[1]))});
+ var ROCK=[[-38,0],[-42,-20],[-28,-38],[0,-46],[30,-40],[43,-18],[36,0]],spk=[],dm=[],nz=document.createElement("canvas"),npat;
+ for(i=0;i<80;i++)spk.push({x:-42+rnd()*85,y:-46+rnd()*46,s:1+rnd()*2,l:rnd()<.4});
+ for(i=0;i<24;i++)dm.push({x:440+rnd()*200,y:GY-80+rnd()*80,p:rnd()*6});
+ nz.width=nz.height=96;(function(){var n=nz.getContext("2d"),d=n.createImageData(96,96),q;for(q=0;q<d.data.length;q+=4){var v=rnd()*255;d.data[q]=d.data[q+1]=d.data[q+2]=v;d.data[q+3]=255}n.putImageData(d,0,0)})();npat=c.createPattern(nz,"repeat");
+
+ function coins(n){for(var k=0;k<n;k++)cn.push({x:60,y:GY-50,vx:(rnd()-.5)*240,vy:-200-rnd()*240,a:0})}
+ function done(g,tag){var big=tag==="JACKPOT!",pink="#ff9ad5";
+  fl.push({x:90,y:GY-96,a:0,s:"+"+fmt(g),col:big?pink:"#f2b84b",sz:big?30:tag?24:19});
+  if(tag)fl.push({x:90,y:GY-126,a:0,s:tag,col:big?pink:"#4fd1c5",sz:16});
+  if(calm)return;coins(big?40:tag?18:5);if(tag){shk=Math.max(shk,big?14:5);flash=Math.max(flash,big?1:.4)}}
+ function celebrate(){if(calm)return;flash=1;shk=10;coins(36)}
+ function fire(on){if(!on||calm)return;kick=1;var n=Math.min(S.m,12);for(var k=0;k<n;k++){var x=160+k*26,y=GY-17,tx=RX-34,d=Math.hypot(tx-x,RY-y);sh.push({x:x,y:y,vx:(tx-x)/d*500,vy:(RY-y)/d*500,a:0})}}
+ function step(dt){T+=dt;
+  kick=Math.max(0,kick-dt*5);shk=Math.max(0,shk-dt*30);flash=Math.max(0,flash-dt*3);fade=Math.max(0,fade-dt*2.5);
+  starT-=dt;if(starT<=0&&!star&&!calm){star={x:200+rnd()*400,y:rnd()*60,a:0};starT=10+rnd()*12}if(star){star.a+=dt;if(star.a>.7)star=null}
+  if(!calm&&Q.amb!=="none")am.forEach(function(q){if(Q.amb==="ember"){q.y-=(20+q.v*40)*dt;q.x+=Math.sin(T*2+q.p)*12*dt;if(q.y<-10){q.y=GY+10;q.x=rnd()*W}}else if(Q.amb==="snow"){q.y+=(15+q.v*30)*dt;q.x+=Math.sin(T+q.p)*10*dt;if(q.y>GY){q.y=-6;q.x=rnd()*W}}else{q.x+=Math.cos(T*.7+q.p)*14*dt;q.y+=Math.sin(T*.9+q.p)*14*dt}});
+  smT-=dt;if(smT<=0&&!calm){smT=.45;sm.push({x:66,y:GY-92,a:0})}
+  droneT-=dt;if(!drone&&droneT<=0)drone={x:-40,t:0};
+  if(drone){drone.t+=dt;drone.x+=(calm?60:120)*dt;if(drone.x>W+40){drone=null;droneT=30+rnd()*25}}
+  fl.forEach(function(f){f.a+=dt});fl=fl.filter(function(f){return f.a<1.2});
+  sh.forEach(function(q){q.a+=dt;q.x+=q.vx*dt;q.y+=q.vy*dt;if(q.x>=RX-34){q.a=9;for(var k=0;k<2;k++)sp.push({x:q.x,y:q.y,vx:-60-rnd()*80,vy:(rnd()-.5)*160,a:0})}});sh=sh.filter(function(q){return q.a<2});
+  sp.forEach(function(q){q.a+=dt;q.x+=q.vx*dt;q.y+=q.vy*dt});sp=sp.filter(function(q){return q.a<.4});
+  cn.forEach(function(q){q.a+=dt;q.x+=q.vx*dt;q.y+=q.vy*dt;q.vy+=560*dt;if(q.y>GY-4&&q.vy>0){q.y=GY-4;q.vy*=-.45;q.vx*=.7}
+   if(q.a>.75&&!calm){var fx=W-24-q.x,fy=14-q.y;q.x+=fx*dt*7;q.y+=fy*dt*7;q.vx=0;q.vy=0;if(Math.hypot(fx,fy)<14)q.a=9}});cn=cn.filter(function(q){return q.a<1.3});
+  sm.forEach(function(q){q.a+=dt;q.y-=22*dt;q.x+=8*dt});sm=sm.filter(function(q){return q.a<2.2})}
+ function hx(h,a){return"rgba("+parseInt(h.slice(1,3),16)+","+parseInt(h.slice(3,5),16)+","+parseInt(h.slice(5,7),16)+","+a+")"}
+ function shd(x,w,h){c.fillStyle="rgba(0,0,0,.28)";c.beginPath();c.ellipse(x+w/2+h*.42,GY+2,(w+h*.84)/2,3.5,0,0,PI*2);c.fill()}
+ function glow(x,y,r,rgb,a){var g=c.createRadialGradient(x,y,0,x,y,r);g.addColorStop(0,"rgba("+rgb+",1)");g.addColorStop(1,"rgba("+rgb+",0)");c.globalCompositeOperation="lighter";c.globalAlpha=a;c.fillStyle=g;c.fillRect(x-r,y-r,r*2,r*2);c.globalAlpha=1;c.globalCompositeOperation="source-over"}
+ function poly(pts,col){c.fillStyle=col;c.beginPath();pts.forEach(function(p,k){k?c.lineTo(p[0],p[1]):c.moveTo(p[0],p[1])});c.closePath();c.fill()}
+ function ln(x1,y1,x2,y2){c.beginPath();c.moveTo(x1,y1);c.lineTo(x2,y2);c.stroke()}
+
+ function worker(x,y,face,ph,mode,hue,sc,carry){
+  var lg=mode===0?Math.sin(ph*14)*7:0,bob=mode===2&&!calm?Math.sin(T*2+x)*1.2:0,ang,g;
+  c.save();c.translate(x,y+bob);c.scale(face*sc,sc);c.lineCap="round";c.lineJoin="round";
+  c.fillStyle="rgba(0,0,0,.3)";c.beginPath();c.ellipse(14*face,0,26,3.5,0,0,PI*2);c.fill();
+  if(mode!==2){g=c.createLinearGradient(8,0,80,0);g.addColorStop(0,"rgba(255,235,160,.3)");g.addColorStop(1,"rgba(255,235,160,0)");c.fillStyle=g;c.beginPath();c.moveTo(8,-48);c.lineTo(80,-70);c.lineTo(80,-24);c.closePath();c.fill()}
+  c.lineWidth=5;c.strokeStyle="#2c3e57";ln(-3,-14,-3+lg,-2);ln(3,-14,3-lg,-2);c.strokeStyle="#5a4630";ln(-3+lg,-2,-1+lg,0);ln(3-lg,-2,5-lg,0);
+  c.fillStyle="hsl("+hue+",55%,48%)";c.fillRect(-7,-36,14,22);c.fillStyle="hsl("+hue+",55%,36%)";c.fillRect(-7,-36,5,22);c.fillStyle="#8a6a2e";c.fillRect(-7,-20,14,3);
+  if(carry){c.fillStyle="#8a5a2e";c.beginPath();c.ellipse(-10,-26,7,9,0,0,PI*2);c.fill();c.fillStyle="#f2b84b";c.beginPath();c.arc(-10,-30,3,0,PI*2);c.fill();glow(-10,-28,16,"255,200,80",.6)}
+  c.fillStyle="#f3c9a0";c.beginPath();c.arc(0,-43,7,0,PI*2);c.fill();c.fillStyle="#2a2a2a";c.fillRect(3,-44,2,2);
+  c.fillStyle="#f2b84b";c.beginPath();c.arc(0,-45,8,PI,0);c.fill();c.fillRect(-9,-45,18,3);c.fillStyle="rgba(255,255,255,.4)";c.fillRect(-4,-52,5,2);c.fillStyle="#fff";c.fillRect(6,-49,4,4);
+  ang=mode===0?-1.2+Math.sin(ph*14)*.15:mode===1?-1.6+(Math.sin(T*12+x)+1)*1.1:-.5;
+  c.translate(3,-32);c.rotate(ang);c.lineWidth=4;
+  c.strokeStyle="hsl("+hue+",55%,48%)";ln(0,0,12,0);c.strokeStyle="#8a6a2e";ln(10,0,30,0);c.strokeStyle="#aab6c6";ln(30,-9,30,9);ln(30,9,34,12);ln(30,-9,34,-12);
+  c.restore()}
+ function drawTurret(i){
+  var x=150+i*26,on=!S.pz&&!puz&&S.e>=DRAIN+S.res,cx=x+10,cy=GY-17,col=on?"hsl(174,"+Math.min(90,45+S.t*5)+"%,"+Math.min(65,45+S.t*2)+"%)":"#4a5563",a=Math.atan2(RY-cy,RX-cx);
+  shd(x,20,24);c.fillStyle="#2c3a4e";c.fillRect(x,GY-7,20,7);c.fillStyle="#3b4d66";c.fillRect(x+3,GY-11,14,5);
+  c.save();c.translate(cx,cy);c.rotate(a);c.fillStyle="#6b7a90";c.fillRect(-kick*3,-2.5,14+Math.min(S.t,8)*2,5);c.restore();
+  c.fillStyle=col;c.beginPath();c.arc(cx,cy,8,0,PI*2);c.fill();c.fillStyle="rgba(255,255,255,.35)";c.beginPath();c.arc(cx-3,cy-3,3,0,PI*2);c.fill();
+  if(S.pz){c.fillStyle="#cfd9ee";c.fillRect(cx-4,cy-26,3,9);c.fillRect(cx+1,cy-26,3,9)}
+  if(on&&kick>.6)glow(cx+Math.cos(a)*(18+Math.min(S.t,8)*2),cy+Math.sin(a)*(18+Math.min(S.t,8)*2),14,"255,210,90",1)}
+
+ function drawWorkers(){
+  var now=Date.now(),idle=Math.max(0,S.wr-S.tr.length),k;
+  for(k=0;k<Math.min(idle,6);k++)worker(40+k*15,GY+14,1,0,2,(k*47+10)%360,.85,false);
+  S.tr.slice().sort(function(a,b){return a.lane-b.lane}).forEach(function(t){
+   var p=Math.min(1,(now-t.s)/(t.d*1000)),x,face,mode,carry=false,y=GY+8+(t.lane%10)*3;
+   if(p<.35){x=HOMEX+(MINEX-HOMEX)*(p/.35);face=1;mode=0}
+   else if(p<.65){x=MINEX;face=1;mode=1;if(!calm&&rnd()<.2)sp.push({x:MINEX+26,y:GY-18,vx:30+rnd()*60,vy:-70-rnd()*60,a:0})}
+   else{x=MINEX-(MINEX-HOMEX)*((p-.65)/.35);face=-1;mode=0;carry=true}
+   worker(x,y,face,now/1000+t.lane,mode,(t.lane*47+10)%360,.85+(t.lane%10)*.012,carry)})}
+ function draw(){
+  var g,k;if(lastTh!==themeOf(S.last)){if(lastTh>=0&&!calm)fade=1;lastTh=themeOf(S.last)}Q=TH[themeOf(S.last)];c.setTransform(dpr,0,0,dpr,0,0);c.save();
+  if(shk>0)c.translate((rnd()-.5)*shk,(rnd()-.5)*shk);
+  g=c.createLinearGradient(0,0,0,GY);g.addColorStop(0,Q.sky[0]);g.addColorStop(.6,Q.sky[1]);g.addColorStop(1,Q.sky[2]);
+  c.fillStyle=g;c.fillRect(-16,-16,W+32,H+32);
+  c.fillStyle="#fff";stars.forEach(function(q){c.globalAlpha=.5+(calm?0:.3*Math.sin(T*1.5+q.p));c.fillRect(q.x,q.y,q.r,q.r)});c.globalAlpha=1;
+  if(star){c.globalAlpha=1-star.a/.7;c.strokeStyle="#fff";c.lineWidth=2;ln(star.x-star.a*260,star.y+star.a*100,star.x-star.a*260+40,star.y+star.a*100-15);c.globalAlpha=1}
+  for(k=0;k<4;k++){var cx0=((k*230+(calm?0:T)*(6+k*3))%(W+260))-130,cy0=40+k*26;c.globalAlpha=.07;c.fillStyle="#fff";c.beginPath();c.ellipse(cx0,cy0,60,10,0,0,PI*2);c.ellipse(cx0+30,cy0-6,40,9,0,0,PI*2);c.fill();c.globalAlpha=1}
+  glow(130,56,70,"200,220,255",.35);c.fillStyle="#e9f0ff";c.beginPath();c.arc(130,56,16,0,PI*2);c.fill();c.fillStyle="#cfd9ee";c.beginPath();c.arc(124,52,4,0,PI*2);c.arc(136,62,3,0,PI*2);c.fill();
+  c.globalAlpha=.5;poly([[-16,GY],[-16,140],[100,100],[200,130],[330,80],[450,125],[560,90],[736,130],[736,GY]],Q.m1);c.globalAlpha=1;c.save();c.translate(Math.sin(T*.15)*5,0);
+  poly([[-16,GY],[-16,170],[80,120],[150,150],[250,95],[340,150],[420,115],[520,160],[600,100],[736,150],[736,GY]],Q.m1);
+  poly([[-16,GY],[-16,190],[60,160],[170,182],[290,140],[400,185],[500,150],[620,180],[736,160],[736,GY]],Q.m2);c.restore();
+  poly([[500,GY],[560,150],[610,118],[670,112],[736,128],[736,GY]],Q.hill);
+  g=c.createLinearGradient(0,GY-60,0,GY);g.addColorStop(0,"rgba("+Q.cave+",0)");g.addColorStop(1,"rgba("+Q.cave+",.14)");c.fillStyle=g;c.fillRect(-16,GY-60,W+32,60);
+  g=c.createLinearGradient(0,GY-120,0,GY);g.addColorStop(0,"rgba(0,0,0,0)");g.addColorStop(1,hx(Q.sky[2],.4));c.fillStyle=g;c.fillRect(-16,GY-120,W+32,120);
+  c.beginPath();c.moveTo(612,GY);c.lineTo(612,GY-52);c.arc(655,GY-52,43,PI,0);c.lineTo(698,GY);c.closePath();c.fillStyle="#04070b";c.fill();c.strokeStyle="#8a6a2e";c.lineWidth=5;c.stroke();
+  glow(655,GY-40,70,Q.cave,.22);
+  g=c.createLinearGradient(655,GY-40,480,GY);g.addColorStop(0,"rgba("+Q.cave+",.2)");g.addColorStop(1,"rgba("+Q.cave+",0)");c.globalCompositeOperation="lighter";c.fillStyle=g;c.beginPath();c.moveTo(640,GY-70);c.lineTo(440,GY);c.lineTo(640,GY);c.closePath();c.fill();c.globalCompositeOperation="source-over";
+  c.fillStyle="#3a2d22";c.fillRect(598,GY-84,2,18);c.fillStyle="#f2b84b";c.fillRect(594,GY-68,10,12);glow(599,GY-62,34,"255,190,90",.45+.15*Math.sin(T*13+Math.sin(T*5)));
+  [[566,Q.c1],[600,Q.c2],[716,Q.c1]].forEach(function(v,j){poly([[v[0]-5,GY],[v[0]-7,GY-20],[v[0],GY-32],[v[0]+7,GY-18],[v[0]+6,GY]],"rgb("+v[1]+")");glow(v[0],GY-18,22,v[1],.35+.2*Math.sin(T*2+j))});
+  g=c.createLinearGradient(0,GY,0,H);g.addColorStop(0,Q.gr[0]);g.addColorStop(1,Q.gr[1]);c.fillStyle=g;c.fillRect(-16,GY,W+32,H-GY+16);
+  c.fillStyle="#3b4d66";c.fillRect(-16,GY,W+32,2);c.fillStyle="#1a2331";peb.forEach(function(q){c.fillRect(q.x,q.y,q.w,2)});
+  [30,100,140,300,360,430,470,540].forEach(function(gx){poly([[gx,GY],[gx+2,GY-9],[gx+4,GY],[gx+6,GY-6],[gx+8,GY]],Q.hill)});
+  shd(484,34,36);shd(112,20,16);shd(20,56,70);c.fillStyle="#4b3b2e";c.fillRect(498,GY-30,4,30);c.fillRect(484,GY-36,34,12);poly([[518,GY-36],[528,GY-30],[518,GY-24]],"#4b3b2e");c.fillStyle="#f2b84b";c.fillRect(490,GY-32,22,2);
+  c.fillStyle="#6b4f35";c.fillRect(112,GY-16,20,16);c.strokeStyle="#3a2d22";c.lineWidth=2;c.strokeRect(112,GY-16,20,16);ln(112,GY-16,132,GY);
+  var lit=S.e>=20;
+  c.fillStyle="#3a2d22";c.fillRect(62,GY-92,9,26);c.fillStyle="#4b3b2e";c.fillRect(20,GY-46,56,46);c.fillStyle="rgba(0,0,0,.18)";for(k=1;k<4;k++)c.fillRect(20,GY-46+k*11,56,1.5);
+  poly([[12,GY-46],[48,GY-72],[84,GY-46]],"#7a3f3a");c.fillStyle="#2c2018";c.fillRect(56,GY-30,12,30);
+  c.fillStyle=lit?"#ffd27a":"#2b3646";c.fillRect(30,GY-34,16,14);if(lit)glow(38,GY-27,70,"255,200,110",.3);
+  for(k=0;k<Math.min(S.m,12);k++)drawTurret(k);
+  sh.forEach(function(q){c.strokeStyle="#ffd36b";c.lineWidth=2.5;c.lineCap="round";ln(q.x-q.vx*.025,q.y-q.vy*.025,q.x,q.y);glow(q.x,q.y,8,"255,200,80",.8)});
+  drawWorkers();c.textAlign="right";c.font="bold 13px 'Trebuchet MS',sans-serif";c.fillStyle="rgba(255,255,255,.7)";c.fillText(MINES[S.last].n,W-14,H-28);c.textAlign="left";
+  dm.forEach(function(q){glow(q.x+Math.sin(T*.6+q.p)*8,q.y+Math.cos(T*.5+q.p)*6,5,Q.cave,.35)});
+  c.fillStyle="#05080c";c.beginPath();c.moveTo(-16,H+10);for(k=-16;k<W+16;k+=9){c.lineTo(k,H-5-Math.abs((k*37)%7)-(calm?0:Math.sin(k*.3+T*.8)*1.2));c.lineTo(k+4,H+10)}c.lineTo(W+16,H+10);c.closePath();c.fill();
+  if(drone){var dy=70+Math.sin(drone.t*2)*26;
+   glow(drone.x,dy,46,"255,200,80",.5+.2*Math.sin(T*8));c.fillStyle="#f2b84b";c.beginPath();c.ellipse(drone.x,dy,15,9,0,0,PI*2);c.fill();
+   c.fillStyle="#fff2b0";c.beginPath();c.ellipse(drone.x+4,dy-3,6,3,0,0,PI*2);c.fill();
+   c.fillStyle="rgba(255,255,255,.55)";c.beginPath();c.ellipse(drone.x-6,dy-10,12,Math.abs(Math.sin(T*50))*7+2,0,0,PI*2);c.fill()}
+  sm.forEach(function(q){c.globalAlpha=Math.max(0,.35-q.a*.16);c.fillStyle="#cfd9ee";c.beginPath();c.arc(q.x,q.y,4+q.a*4,0,PI*2);c.fill()});c.globalAlpha=1;
+  sp.forEach(function(q){glow(q.x,q.y,7,"255,220,120",1-q.a*2.5)});
+  cn.forEach(function(q){var al=q.a>.75?1:Math.max(0,1.3-q.a);glow(q.x,q.y,12,"255,200,80",al*.5);c.globalAlpha=Math.min(1,al*2);c.fillStyle="#f2b84b";c.beginPath();c.arc(q.x,q.y,4,0,PI*2);c.fill();c.fillStyle="#fff2b0";c.fillRect(q.x-1.5,q.y-2.5,2,2);c.globalAlpha=1});
+  if(ring>0){c.globalAlpha=ring*.6;c.strokeStyle="#ffe08a";c.lineWidth=3;c.beginPath();c.arc(RX,RY,20+(1-ring)*90,0,PI*2);c.stroke();c.globalAlpha=1}
+  c.textAlign="center";c.lineJoin="round";
+  fl.forEach(function(f){var sc=1+Math.max(0,.25-f.a)*3;c.save();c.translate(f.x,f.y-f.a*34);c.scale(sc,sc);c.globalAlpha=Math.min(1,(1.2-f.a)*2);c.font="bold "+f.sz+"px 'Trebuchet MS',sans-serif";c.lineWidth=4;c.strokeStyle="rgba(8,12,20,.85)";c.strokeText(f.s,0,0);c.fillStyle=f.col;c.fillText(f.s,0,0);c.restore()});
+  c.globalAlpha=1;
+  if(Q.amb!=="none")am.forEach(function(q){if(Q.amb==="snow"){c.fillStyle="rgba(255,255,255,.8)";c.beginPath();c.arc(q.x,q.y,1+q.v*1.6,0,PI*2);c.fill()}else glow(q.x,q.y,Q.amb==="ember"?7:9,Q.amb==="ember"?"255,140,50":Q.amb==="void"?"210,100,255":Q.c1,.6+.4*Math.sin(T*3+q.p))});
+  c.textAlign="left";
+  if(cmb>1){c.font="bold "+(16+cmb)+"px 'Trebuchet MS',sans-serif";c.lineWidth=4;c.strokeStyle="rgba(8,12,20,.85)";c.fillStyle="hsl("+(174-cmb*13)+",85%,60%)";
+   var ct=cmb>=10?"MAX COMBO x10":"Combo x"+cmb;c.strokeText(ct,16,34);c.fillText(ct,16,34);c.fillRect(16,42,100*cmbT/1.4,4)}
+  c.restore();
+  if(flash>0){c.globalAlpha=flash*.35;c.fillStyle="#f2b84b";c.fillRect(0,0,W,H);c.globalAlpha=1}
+  c.save();c.globalAlpha=.06;c.globalCompositeOperation="overlay";c.translate(calm?0:rnd()*96,calm?0:rnd()*96);c.fillStyle=npat;c.fillRect(-96,-96,W+192,H+192);c.restore();
+  g=c.createRadialGradient(W/2,H/2,H*.45,W/2,H/2,W*.62);g.addColorStop(0,"rgba(0,0,0,0)");g.addColorStop(1,"rgba(0,0,0,.4)");c.fillStyle=g;c.fillRect(0,0,W,H);
+  if(fade>0){c.globalAlpha=fade;c.fillStyle="#000";c.fillRect(0,0,W,H);c.globalAlpha=1}}
+
+ cv.addEventListener("pointerdown",function(e){var b=cv.getBoundingClientRect(),x=(e.clientX-b.left)*W/b.width,y=(e.clientY-b.top)*H/b.height;
+  if(drone&&Math.hypot(x-drone.x,y-(70+Math.sin(drone.t*2)*26))<34){drone=null;droneT=30+rnd()*25;droneReward()}});
+ function frame(now){var dt=Math.min(.05,(now-last)/1000);last=now;step(dt);draw();finishTrips();updTrips();requestAnimationFrame(frame)}
+ requestAnimationFrame(frame);
+ return{done:done,fire:fire,celebrate:celebrate};
+})();
+mp=(S.last/10)|0;
+buildAuto();userUI();
+finishTrips();
+say("Welcome! Open the Mines tab and send a worker to the Copper Pit.");
+render();setInterval(tick,1000);setInterval(finishTrips,250);
+if(S.spent>=S.nx)openPuzzle();
+try{if(!localStorage.getItem("oaIntro"))$("intro").hidden=false}catch(x){}
+document.addEventListener("visibilitychange",function(){if(document.hidden)save()});
+document.addEventListener("keydown",function(e){if(e.target!==document.body)return;if(e.code==="Space"&&(!$("p-mine").hidden||!$("p-mines").hidden)){e.preventDefault();sendCrew()}else if(e.code==="KeyP")pause()});
+window.OAgame={adopt:function(u){USER=u;KEY="oreAndAmps3_"+u.toLowerCase();save();userUI();say("Account created. Your progress is now saved.")}};
 };
-
-let game;
-try {
-  game = {...defaults,...JSON.parse(
-    localStorage.getItem("galaxyEmpire") || "{}"
-  )};
-} catch {
-  game = {...defaults};
-}
-
-const costs = {farm:35,mine:50,hab:75,lab:100};
-
-function show(message) {
-  document.getElementById("log").textContent = message;
-}
-
-function render() {
-  ["credits","energy","minerals","research",
-   "farm","mine","hab","lab","planets"].forEach(key=>{
-    document.getElementById(key).textContent =
-      Math.floor(game[key]).toLocaleString();
-  });
-}
-
-function saveGame() {
-  localStorage.setItem("galaxyEmpire",JSON.stringify(game));
-  show("Empire saved on this device!");
-}
-
-function build(type) {
-  let cost = Math.floor(costs[type] * Math.pow(1.5,game[type]));
-  if(game.credits < cost) {
-    show("Not enough credits! Build your economy first.");
-    return;
-  }
-
-  game.credits -= cost;
-  game[type]++;
-  show(type.toUpperCase()+" upgraded to level "+game[type]+"!");
-  render();
-  saveGame();
-}
-
-function explore() {
-  if(game.energy < 20) {
-    show("Not enough energy to explore!");
-    return;
-  }
-
-  game.energy -= 20;
-  const roll = Math.random();
-
-  if(roll < .35) {
-    game.minerals += 40;
-    show("Asteroid discovered! +40 minerals.");
-  } else if(roll < .7) {
-    game.credits += 100;
-    show("Abandoned space station found! +100 credits.");
-  } else if(roll < .9) {
-    game.research += 25;
-    show("Alien technology discovered! +25 research.");
-  } else {
-    game.planets = Math.min(5,game.planets+1);
-    show("NEW PLANET COLONIZED! Your empire expands!");
-  }
-
-  document.getElementById("planets").textContent=game.planets;
-  render();
-  saveGame();
-}
-
-function resetGame() {
-  if(!confirm("Erase your empire and start again?")) return;
-  game = {...defaults};
-  saveGame();
-  render();
-  show("A new empire begins!");
-}
-
-setInterval(()=>{
-  game.energy += game.farm * 1.5;
-  game.minerals += game.mine * 0.8;
-  game.credits += game.hab * 1.2;
-  game.research += game.lab * 0.4;
-  render();
-  saveGame();
-},1000);
-
-render();
+</script>
+<script>
+(function(){
+var UK="oa_users",SK="oa_user",mode="login",started=false,$=function(i){return document.getElementById(i)};
+function users(){try{return JSON.parse(localStorage.getItem(UK))||{}}catch(e){return{}}}
+function putUsers(u){try{localStorage.setItem(UK,JSON.stringify(u));return true}catch(e){return false}}
+function hex(b){return Array.prototype.map.call(new Uint8Array(b),function(x){return("0"+x.toString(16)).slice(-2)}).join("")}
+function salt(){var a=new Uint8Array(16);try{crypto.getRandomValues(a)}catch(e){for(var i=0;i<16;i++)a[i]=Math.floor(Math.random()*256)}return hex(a)}
+function cyrb(s){var h1=0xdeadbeef,h2=0x41c6ce57,i,c;for(i=0;i<s.length;i++){c=s.charCodeAt(i);h1=Math.imul(h1^c,2654435761);h2=Math.imul(h2^c,1597334677)}
+ h1=Math.imul(h1^(h1>>>16),2246822507)^Math.imul(h2^(h2>>>13),3266489909);h2=Math.imul(h2^(h2>>>16),2246822507)^Math.imul(h1^(h1>>>13),3266489909);return(4294967296*(2097151&h2)+(h1>>>0)).toString(16)}
+function canPbk(){return !!(window.crypto&&crypto.subtle&&window.TextEncoder)}
+function hash(pw,sl,alg){
+ if(alg==="p"){var enc=new TextEncoder();
+  return crypto.subtle.importKey("raw",enc.encode(pw),"PBKDF2",false,["deriveBits"]).then(function(k){return crypto.subtle.deriveBits({name:"PBKDF2",salt:enc.encode(sl),iterations:100000,hash:"SHA-256"},k,256)}).then(function(b){return"p:"+hex(b)})}
+ return Promise.resolve("c:"+cyrb(sl+pw+sl))}
+function msg(t){$("am").textContent=t||""}
+function setMode(m){mode=m;$("at").textContent=m==="login"?"Log in":"Create account";$("ab").textContent=m==="login"?"Log in":"Create account";
+ $("as").textContent=m==="login"?"Create account":"I already have an account";$("ap").autocomplete=m==="login"?"current-password":"new-password";msg("")}
+function done(name,isNew){
+ if(started&&!isNew&&!confirm("Logging in will replace your current guest game with the saved one. Continue?"))return;
+ try{sessionStorage.setItem(SK,name)}catch(e){}
+ $("auth").hidden=true;
+ if(!started){started=true;window.startGame(name)}
+ else if(isNew&&window.OAgame)window.OAgame.adopt(name);
+ else location.reload()}
+function submit(){
+ var name=$("au").value.trim(),pw=$("ap").value,key=name.toLowerCase(),U=users();
+ if(!/^[A-Za-z0-9_]{3,20}$/.test(name))return msg("Username: 3 to 20 letters, numbers, or underscores.");
+ if(mode==="register"){
+  if(pw.length<6)return msg("Password must be at least 6 characters.");
+  if(U[key])return msg("That username is taken.");
+  var sl=salt(),alg=canPbk()?"p":"c";
+  hash(pw,sl,alg).then(function(h){var V=users();if(V[key])return msg("That username is taken.");V[key]={n:name,s:sl,h:h};if(!putUsers(V))return msg("This browser blocked saving accounts.");done(name,true)});
+ }else{
+  var u=U[key];if(!u)return msg("No account with that username.");
+  var a=u.h.charAt(0);if(a==="p"&&!canPbk())return msg("This browser cannot check that password.");
+  hash(pw,u.s,a).then(function(h){if(h===u.h)done(u.n,false);else msg("Wrong password.")})}}
+$("ab").onclick=submit;
+$("as").onclick=function(){setMode(mode==="login"?"register":"login")};
+$("ag").onclick=function(){if(!started){started=true;$("auth").hidden=true;window.startGame(null)}};
+$("ax").onclick=function(){$("auth").hidden=true};
+["au","ap"].forEach(function(i){$(i).addEventListener("keydown",function(e){if(e.key==="Enter")submit()})});
+window.openAuth=function(){setMode("register");$("ax").hidden=false;$("ag").hidden=true;$("auth").hidden=false};
+var sess=null;try{sess=sessionStorage.getItem(SK)}catch(e){}
+var U0=users();
+if(sess&&U0[sess.toLowerCase()]){started=true;window.startGame(U0[sess.toLowerCase()].n)}
+else{setMode(Object.keys(U0).length?"login":"register");$("auth").hidden=false}
+})();
 </script>
 </body>
 </html>
