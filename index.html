@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="game-version" content="5">
+<meta name="game-version" content="6">
 <title>Ore &amp; Amps</title>
 <style>
 :root{--bg:#0b1220;--panel:#18222f;--line:#2f4259;--text:#e8edf3;--dim:#93a1b3;--en:#4fd1c5;--cr:#f2b84b;--co:#c792ea;--bad:#ff7a7a}
@@ -92,6 +92,7 @@ footer{margin-top:6px;text-align:right}
  <p>3. Spend credits in the Shop. Coins buy upgrades, speed, workers, turrets, and new mines.</p>
  <p>4. Every 750 energy you spend, a puzzle appears. Solve it for +20 energy, or pay energy, credits, or coins to skip it. You can make puzzles rarer in Upgrades.</p>
  <p>5. In the Auto tab, buy an Auto-Dispatcher and autobuyers that spend your money for you.</p>
+ <p>6. The last page of Mines holds 10 special caves. They are gambles: big rewards, or thieves who steal from you. Each one runs alone, with no other mines at the same time, and costs coins to enter.</p>
  <button class="big" id="introb">Let's mine!</button></div></div>
 <div id="auth"><div class="box">
  <h2 id="at">Log in</h2>
@@ -130,7 +131,7 @@ footer{margin-top:6px;text-align:right}
 <div id="p-mines" hidden>
 <div id="host2"></div>
 <div class="chips"><span id="chw2"></span><span id="chs2"></span><span id="chv2"></span></div>
-<section><h2>Mines</h2><p class="note" id="mreg"></p><div class="row" id="mpg" style="margin-top:8px"><button id="mp0">1</button><button id="mp1">2</button><button id="mp2">3</button><button id="mp3">4</button><button id="mp4">5</button><button id="mp5">6</button><button id="mp6">7</button><button id="mp7">8</button><button id="mp8">9</button><button id="mp9">10</button></div></section>
+<section><h2>Mines</h2><p class="note" id="mreg"></p><div class="row" id="mpg" style="margin-top:8px"><button id="mp0">1</button><button id="mp1">2</button><button id="mp2">3</button><button id="mp3">4</button><button id="mp4">5</button><button id="mp5">6</button><button id="mp6">7</button><button id="mp7">8</button><button id="mp8">9</button><button id="mp9">10</button><button id="mp10">Special</button></div></section>
 <section><div class="mh"><h2 id="mn0"></h2><span class="note" id="mt0"></span></div><p class="note" id="md0"></p><div class="mbar"><i id="mf0"></i></div><button id="mb0"></button></section>
 <section><div class="mh"><h2 id="mn1"></h2><span class="note" id="mt1"></span></div><p class="note" id="md1"></p><div class="mbar"><i id="mf1"></i></div><button id="mb1"></button></section>
 <section><div class="mh"><h2 id="mn2"></h2><span class="note" id="mt2"></span></div><p class="note" id="md2"></p><div class="mbar"><i id="mf2"></i></div><button id="mb2"></button></section>
@@ -192,7 +193,7 @@ footer{margin-top:6px;text-align:right}
 window.startGame=function(USER){
 var KEY=USER?"oreAndAmps3_"+USER.toLowerCase():null,RATE=4,COIN=80,DRAIN=4,PUZ=[750,1500,3000,75000],PUZC=[0,150,700,2500];
 var $=function(id){return document.getElementById(id)};
-function fresh(){return{e:1000,c:0,k:0,L:1,sp:0,sl:1,wr:1,m:0,t:0,earned:0,age:0,won:0,ms:0,spent:0,nx:750,pi:0,v:5,pn:0,tc:0,last:0,un:[1],tr:[],pz:0,res:60,ac:[],ab:{},al:0,ao:1}}
+function fresh(){return{e:1000,c:0,k:0,L:1,sp:0,sl:1,wr:1,m:0,t:0,earned:0,age:0,won:0,ms:0,spent:0,nx:750,pi:0,v:6,spn:0,spd:[],pn:0,tc:0,last:0,un:[1],tr:[],pz:0,res:60,ac:[],ab:{},al:0,ao:1}}
 function load(){if(!KEY){try{var g=sessionStorage.getItem("oa_guest");if(g){sessionStorage.removeItem("oa_guest");var o=JSON.parse(g);return o&&typeof o.e==="number"?o:null}}catch(x){}return null}try{var s=JSON.parse(localStorage.getItem(KEY));return s&&typeof s.e==="number"?s:null}catch(x){return null}}
 function migrate(o){var f=fresh();for(var k in f)if(o[k]===undefined)o[k]=f[k];o.v=f.v;return o}
 function save(){if(!KEY)return;try{localStorage.setItem(KEY,JSON.stringify(S))}catch(x){}}
@@ -235,10 +236,10 @@ function say(t){logs.unshift(t);logs=logs.slice(0,5);$("log").innerHTML=logs.map
 function gain(n){S.c+=n;S.earned+=n}
 function nUn(){return S.un.filter(Boolean).length}
 function bestMine(){for(var i=99;i>=0;i--)if(S.un[i])return i;return 0}
-function yieldOf(i){return(5*S.L+2)*MINES[i].mult}
+function yieldOf(i){return i>=100?yieldNow():(5*S.L+2)*MINES[i].mult}
 function yieldNow(){return yieldOf(bestMine())}
-function tripCost(i){return 20+Math.round(i*1.2)}
-function tripTime(i){return Math.max(.8,(3.5+i*.03)/(1+.12*S.sp))}
+function tripCost(i){return i>=100?SPECIAL[i-100].en:20+Math.round(i*1.2)}
+function tripTime(i){return i>=100?Math.max(3,SPECIAL[i-100].t/(1+.06*S.sp)):Math.max(.8,(3.5+i*.03)/(1+.12*S.sp))}
 var SPMAX=20,SLMAX=100,WRMAX=500,PERMINE=5,wpg=0;
 function upCost(){return Math.ceil(3*Math.pow(1.32,S.L-1))}
 function spCost(){return Math.ceil(4*Math.pow(1.45,S.sp))}
@@ -250,13 +251,50 @@ function mineLoad(i){var n=0;for(var q=0;q<S.tr.length;q++)if(S.tr[q].i===i)n++;
 function activeMines(){var m={},n=0;S.tr.forEach(function(t){if(!m[t.i]){m[t.i]=1;n++}});return n}
 function tripOf(k){for(var q=0;q<S.tr.length;q++)if(S.tr[q].w===k)return S.tr[q];return null}
 function freeWorker(){for(var k=0;k<S.wr;k++)if(!tripOf(k))return k;return -1}
-function canSend(i){var ld=mineLoad(i);return !!S.un[i]&&!puz&&S.tr.length<S.wr&&ld<PERMINE&&(ld>0||activeMines()<S.sl)&&S.e>=tripCost(i)}
+function spActive(){for(var q=0;q<S.tr.length;q++)if(S.tr[q].x)return true;return false}
+function canSend(i){var ld=mineLoad(i);return !!S.un[i]&&!puz&&!spActive()&&S.tr.length<S.wr&&ld<PERMINE&&(ld>0||activeMines()<S.sl)&&S.e>=tripCost(i)}
 var hold=false;
 function send(i,auto,wi){if(!canSend(i))return false;var w=wi===undefined?freeWorker():wi;if(w<0||w>=S.wr||tripOf(w))return false;
  var cst=tripCost(i);S.e-=cst;S.spent+=cst;
  S.tr.push({i:i,s:Date.now(),d:tripTime(i),w:w,lane:w,a:auto?1:0});S.last=i;sfx("hit");
  if(!hold&&!puz&&S.spent>=S.nx)openPuzzle();return true}
-function reward(t){var m=MINES[t.i],r=Math.random(),tag="",mul=1;
+var SPECIAL=[
+{n:"Dusty Gamble",lv:2,base:1,t:5,en:40,o:[{p:.55,a:[["cr",2.5]],t:"You found a rich pocket!"},{p:.30,a:[["cr",1]],t:"A small haul."},{p:.15,a:[["sc",.10]],t:"A thief grabbed your purse!"}]},
+{n:"Lucky Hole",lv:4,base:2,t:6,en:70,o:[{p:.40,a:[["cr",4]],t:"Lucky! A big pile of ore."},{p:.35,a:[["cr",1.5]],t:"A decent haul."},{p:.15,a:[],t:"The hole was empty."},{p:.10,a:[["se",.15]],t:"Bats drained your lamps!"}]},
+{n:"Bandit Den",lv:6,base:3,t:6,en:100,o:[{p:.35,a:[["cr",6]],t:"You raided the bandits' loot!"},{p:.30,a:[["cr",2]],t:"You found a stash."},{p:.35,a:[["sc",.20]],t:"The bandits robbed you!"}]},
+{n:"Goblin Vault",lv:9,base:4,t:7,en:130,o:[{p:.25,a:[["cr",10]],t:"The vault was full!"},{p:.30,a:[["cr",3]],t:"You grabbed some gold."},{p:.25,a:[],t:"The goblins hid everything."},{p:.20,a:[["sc",.25]],t:"Goblins picked your pockets!"}]},
+{n:"Cursed Mine",lv:12,base:5,t:7,en:160,o:[{p:.20,a:[["cr",15]],t:"The curse paid off!"},{p:.30,a:[["cr",3]],t:"A little cursed gold."},{p:.25,a:[["sc",.30]],t:"The curse took your credits!"},{p:.25,a:[["sk",.10]],t:"The curse took some coins!"}]},
+{n:"Dragon's Hoard",lv:16,base:7,t:8,en:190,o:[{p:.15,a:[["cr",25]],t:"You found the dragon's treasure!"},{p:.25,a:[["cr",5]],t:"A pile of gold."},{p:.30,a:[],t:"The dragon was asleep. Nothing here."},{p:.20,a:[["sc",.35]],t:"The dragon burned your credits!"},{p:.10,a:[["sk",.20],["se",.30]],t:"The dragon took coins and energy!"}]},
+{n:"Thieves' Guild",lv:21,base:9,t:8,en:220,o:[{p:.10,a:[["cr",40]],t:"You cracked the guild safe!"},{p:.20,a:[["cr",6]],t:"You took a cut."},{p:.25,a:[],t:"The guild chased you off."},{p:.45,a:[["sc",.40]],t:"The guild robbed you blind!"}]},
+{n:"Shadow Rift",lv:27,base:11,t:9,en:250,o:[{p:.08,a:[["cr",60]],t:"The rift overflowed with ore!"},{p:.22,a:[["cr",8]],t:"Shadows left you some ore."},{p:.25,a:[],t:"Only darkness."},{p:.25,a:[["sc",.40]],t:"Shadows stole your credits!"},{p:.20,a:[["sk",.15],["se",.25]],t:"Shadows stole coins and energy!"}]},
+{n:"Demon's Bank",lv:34,base:13,t:10,en:280,o:[{p:.06,a:[["cr",100]],t:"You broke the demon's bank!"},{p:.19,a:[["cr",10]],t:"A small withdrawal."},{p:.20,a:[],t:"The bank was closed."},{p:.30,a:[["sc",.50]],t:"The demon took half your credits!"},{p:.25,a:[["sk",.30],["se",.30]],t:"The demon took coins and energy!"}]},
+{n:"The Black Vault",lv:42,base:15,t:12,en:310,o:[{p:.05,a:[["cr",250],["co",3]],t:"You emptied the Black Vault!"},{p:.15,a:[["cr",15]],t:"A few gold bars."},{p:.20,a:[],t:"The vault was empty."},{p:.30,a:[["sc",.60]],t:"The vault swallowed most of your credits!"},{p:.20,a:[["sk",.40]],t:"The vault swallowed your coins!"},{p:.10,a:[["sc",.30],["sk",.20],["se",.50]],t:"The vault took a bit of everything!"}]}];
+function M(i){return i>=100?SPECIAL[i-100]:MINES[i]}
+function feeOf(k){return Math.max(SPECIAL[k].base,Math.ceil(yieldNow()*0.15*(k+1)/COIN))}
+function efx(e){var v=e[1],k=e[0];return k==="cr"?"win "+v+"x ore":k==="co"?"win "+v+" coins":k==="sc"?"lose "+Math.round(v*100)+"% of credits":k==="se"?"lose "+Math.round(v*100)+"% of energy":"lose "+Math.round(v*100)+"% of coins"}
+function odds(c){return c.o.map(function(o){return Math.round(o.p*100)+"% "+(o.a.length?o.a.map(efx).join(" and "):"nothing")}).join(", ")}
+function canEnter(k){var c=SPECIAL[k];return S.L>=c.lv&&!puz&&S.tr.length===0&&S.wr>=1&&S.k>=feeOf(k)&&S.e>=c.en}
+function enterSpecial(k){if(!canEnter(k))return false;var c=SPECIAL[k],f=feeOf(k),w=freeWorker();
+ S.k-=f;S.e-=c.en;S.spent+=c.en;
+ S.tr.push({i:100+k,s:Date.now(),d:tripTime(100+k),w:w,lane:w,a:0,x:1});S.last=100+k;S.spn=(S.spn||0)+1;S.spd=S.spd||[];S.spd[k]=1;
+ sfx("hit");say("You enter "+c.n+" alone. Entry fee: "+fmt(f)+" coins.");
+ if(!hold&&!puz&&S.spent>=S.nx)openPuzzle();render();return true}
+function resolveSpecial(t){var k=t.i-100,c=SPECIAL[k],r=Math.random(),acc=0,o=c.o[c.o.length-1],q,Y=yieldNow(),parts=[],bad=false,big=0;
+ for(q=0;q<c.o.length;q++){acc+=c.o[q].p;if(r<acc){o=c.o[q];break}}
+ o.a.forEach(function(e){var kd=e[0],v=e[1],l;
+  if(kd==="cr"){var g=Math.round(Y*v*(.9+Math.random()*.2));gain(g);parts.push("+"+fmt(g)+" credits");big=Math.max(big,v)}
+  else if(kd==="co"){S.k+=v;parts.push("+"+v+" coins")}
+  else if(kd==="sc"){l=Math.floor(S.c*v);S.c-=l;parts.push("-"+fmt(l)+" credits");bad=true}
+  else if(kd==="se"){l=Math.floor(S.e*v);S.e-=l;parts.push("-"+fmt(l)+" energy");bad=true}
+  else if(kd==="sk"){l=Math.floor(S.k*v);S.k-=l;parts.push("-"+fmt(l)+" coins");bad=true}});
+ S.tc++;
+ var msg=o.t+(parts.length?" "+parts.join(", "):"");
+ toast(c.n+": "+msg);say(c.n+": "+msg);
+ if(bad){A.loss(parts.filter(function(x){return x.charAt(0)==="-"}).join(" "));sfx("no");buzz([120,40,120])}
+ else if(big>0){A.done(Math.round(Y*big),big>=20?"JACKPOT!":big>=5?"Lucky strike!":"");sfx(big>=20?"jack":big>=5?"crit":"coin");if(big>=5)buzz([40,30,80])}
+ else sfx("buy");
+ miles()}
+function reward(t){if(t.x){resolveSpecial(t);return}var m=MINES[t.i],r=Math.random(),tag="",mul=1;
  if(r<.02){mul=6;tag="JACKPOT!"}else if(r<.12){mul=2.5;tag="Lucky strike!"}
  if(Math.random()<m.gem){mul*=1.6;tag=tag||"Gem!"}
  var g=Math.round(yieldOf(t.i)*(.85+Math.random()*.3)*mul);gain(g);S.tc++;
@@ -387,7 +425,7 @@ function ptap(e){if(!puz)return;var b=pcv.getBoundingClientRect(),x=(e.clientX-b
  else{var cx=Math.floor(x/cs),cy=Math.floor(y/cs);if(cx<0||cy<0||cx>=p.n||cy>=p.n)return;
   var i=cy*p.n+cx;p.m[i]=rot(p.m[i]);p.taps--;sfx("hit");if(fillP(p))solveP();else if(p.taps<=0)failP("Out of taps!");else $("pzn").textContent="Taps left: "+p.taps+". If you run out you lose 30 energy."}}
 
-var ACH=[{n:"Send your first worker",t:function(){return S.tc>=1}},{n:"Complete 50 trips",t:function(){return S.tc>=50}},{n:"Hire 3 workers",t:function(){return S.wr>=3}},{n:"Run 3 mines at once",t:function(){return S.sl>=3}},{n:"Build a turret",t:function(){return S.m>=1}},{n:"Solve 5 puzzles",t:function(){return S.pn>=5}},{n:"Reach mine level 10",t:function(){return S.L>=10}},{n:"Unlock 10 mines",t:function(){return nUn()>=10}},{n:"Earn 1,000,000 credits",t:function(){return S.earned>=1e6}},{n:"Solve 15 puzzles",t:function(){return S.pn>=15}},{n:"Unlock 50 mines",t:function(){return nUn()>=50}}];
+var ACH=[{n:"Send your first worker",t:function(){return S.tc>=1}},{n:"Complete 50 trips",t:function(){return S.tc>=50}},{n:"Hire 3 workers",t:function(){return S.wr>=3}},{n:"Run 3 mines at once",t:function(){return S.sl>=3}},{n:"Build a turret",t:function(){return S.m>=1}},{n:"Solve 5 puzzles",t:function(){return S.pn>=5}},{n:"Reach mine level 10",t:function(){return S.L>=10}},{n:"Unlock 10 mines",t:function(){return nUn()>=10}},{n:"Earn 1,000,000 credits",t:function(){return S.earned>=1e6}},{n:"Solve 15 puzzles",t:function(){return S.pn>=15}},{n:"Unlock 50 mines",t:function(){return nUn()>=50}},{n:"Enter a special cave",t:function(){return (S.spn||0)>=1}},{n:"Enter all 10 special caves",t:function(){var c=0;(S.spd||[]).forEach(function(v){if(v)c++});return c>=10}}];
 function achs(){ACH.forEach(function(a,i){if(!S.ac[i]&&a.t()){S.ac[i]=1;S.k+=1;toast("Achievement: "+a.n+" (+1 coin)");sfx("mile");A.celebrate();say("Achievement unlocked: "+a.n+".")}})}
 var AB=[
 {id:"en",n:"Auto Energy",cost:5,d:"When your energy drops below the trigger, spends a set amount of credits on energy every second.",p1:"Trigger when energy is below",v1:100,p2:"Credits to spend each time",v2:50},
@@ -458,6 +496,7 @@ function tick(){S.age++;
  render()}
 function why(i){var ld=mineLoad(i);
  if(puz)return"Solve the puzzle first";
+ if(spActive())return"A special cave is running alone";
  if(ld>=PERMINE)return"Station full ("+PERMINE+"/"+PERMINE+")";
  if(S.tr.length>=S.wr)return"No free worker";
  if(ld===0&&activeMines()>=S.sl)return"No free mine slot";
@@ -471,22 +510,28 @@ function render(){
  $("crew").disabled=!anySend();$("gen").hidden=!(S.e<tripCost(0)&&S.c<10);
  $("pz").textContent=S.pz?"Resume turrets (P)":"Pause turrets (P)";$("pz").disabled=S.m<1;$("rs").textContent="Energy reserve: "+S.res;
  $("tinfo").textContent=(S.m<1?"No turrets yet. Buy one in Upgrades.":S.pz?"Turrets paused. They use no energy.":"Running "+S.m+" turret"+(S.m>1?"s":"")+".")+" Next puzzle in "+fmt(Math.max(0,S.nx-S.spent))+" energy.";
- $("mreg").textContent=REG[mp]+": mines "+(mp*10+1)+" to "+(mp*10+10);
- for(var mj=0;mj<10;mj++){var mi=mp*10+mj,mm=MINES[mi],mb=$("mb"+mj);$("mn"+mj).textContent=(mi+1)+". "+mm.n;
+ $("mreg").textContent=mp===10?"Special caves: gambles that always run alone. Each costs coins to enter, and the odds are shown on every card.":REG[mp]+": mines "+(mp*10+1)+" to "+(mp*10+10);
+ for(var mj=0;mj<10;mj++){var mi=mp*10+mj,mb=$("mb"+mj);
+  if(mp===10){var sc=SPECIAL[mj],sf=feeOf(mj),srun=false;S.tr.forEach(function(t){if(t.i===mi)srun=true});
+   $("mn"+mj).textContent="Special "+(mj+1)+". "+sc.n;
+   $("md"+mj).textContent="Entry fee: "+fmt(sf)+" coins | Energy: "+sc.en+" | Trip: "+Math.round(tripTime(mi))+"s | Runs alone. Odds: "+odds(sc)+".";
+   $("mt"+mj).textContent=S.L<sc.lv?"Needs mine level "+sc.lv:"Runs alone";
+   mb.textContent=S.L<sc.lv?"Needs mine level "+sc.lv:puz?"Solve the puzzle first":srun?"Running...":S.tr.length>0?"Wait for other mines to finish":S.k<sf?"Need "+fmt(sf)+" coins":S.e<sc.en?"Need "+sc.en+" energy":"Enter ("+fmt(sf)+" coins)";
+   mb.disabled=!canEnter(mj);mb.classList.toggle("ready",false);continue}
+  var mm=MINES[mi];$("mn"+mj).textContent=(mi+1)+". "+mm.n;
   $("md"+mj).textContent="Pays "+fmt(yieldOf(mi))+" per trip | "+tripTime(mi).toFixed(1)+"s | "+tripCost(mi)+" energy | "+Math.round(mm.gem*100)+"% gems"+(S.un[mi]?"":" | Needs mine level "+mm.lv);
   $("mt"+mj).textContent=S.un[mi]?"Workers here: "+mineLoad(mi)+"/"+PERMINE:"Locked";
   if(S.un[mi]){mb.textContent=why(mi);mb.disabled=!canSend(mi);mb.classList.toggle("ready",false)}
   else{mb.textContent=(mi>0&&!S.un[mi-1])?"Unlock the previous mine first":S.L<mm.lv?"Needs mine level "+mm.lv:"Unlock ("+fmt(mm.cost)+" coins)";mb.disabled=!canUnlock(mi);mb.classList.toggle("ready",canUnlock(mi))}}
- for(var mq=0;mq<10;mq++){var any=false;for(var m3=0;m3<10;m3++)if(canUnlock(mq*10+m3))any=true;$("mp"+mq).classList.toggle("on",mq===mp);$("mp"+mq).classList.toggle("ready",any&&mq!==mp)}
-
+ for(var mq=0;mq<11;mq++){var any=false;if(mq<10)for(var m3=0;m3<10;m3++)if(canUnlock(mq*10+m3))any=true;$("mp"+mq).classList.toggle("on",mq===mp);$("mp"+mq).classList.toggle("ready",any&&mq!==mp)}
  var wpages=Math.max(1,Math.ceil(S.wr/10));if(wpg>=wpages)wpg=wpages-1;
  $("wsum").textContent=S.wr+" worker"+(S.wr>1?"s":"")+": "+S.tr.length+" working, "+(S.wr-S.tr.length)+" idle. Each mine fits up to "+PERMINE+" workers.";
  $("wpl").textContent="Page "+(wpg+1)+" of "+wpages;$("wprev").disabled=wpg<=0;$("wnext").disabled=wpg>=wpages-1;
  for(var wi=0;wi<10;wi++){var wk=wpg*10+wi,wrw=$("wr"+wi);wrw.hidden=wk>=S.wr;if(wk>=S.wr)continue;
   var wt=tripOf(wk);$("wn"+wi).textContent="Worker "+(wk+1);
-  $("ws"+wi).textContent=wt?"Mining: "+MINES[wt.i].n+" ("+Math.max(0,Math.ceil((wt.s+wt.d*1000-Date.now())/1000))+"s left)":"Idle";
+  $("ws"+wi).textContent=wt?"Mining: "+M(wt.i).n+" ("+Math.max(0,Math.ceil((wt.s+wt.d*1000-Date.now())/1000))+"s left)":"Idle";
   $("wb"+wi).textContent=wt?"Working...":"Send to best mine";$("wb"+wi).disabled=!!wt||!anySend()}
- var lm=MINES[S.last];
+ var lm=M(S.last);
  $("ui_m").textContent="Level "+S.L+" of "+MAXL+". Each level adds 5 ore to every trip. The "+lm.n+" now pays "+fmt(yieldOf(S.last))+" per trip.";
  $("upm").textContent=S.L>=MAXL?"Maxed":"Level "+(S.L+1)+" ("+fmt(upCost())+" coins)";$("upm").disabled=S.L>=MAXL||S.k<upCost();
  $("ui_s").textContent="Level "+S.sp+" of "+SPMAX+". A trip to the "+lm.n+" takes "+tripTime(S.last).toFixed(2)+"s.";
@@ -509,7 +554,7 @@ function render(){
  $("as_up").textContent=S.al>=20?"Auto-Dispatcher maxed":"Upgrade Auto-Dispatcher to level "+(S.al+1)+" ("+fmt(adCost())+" coins)";$("as_up").disabled=S.al>=20||S.k<adCost();$("as_up").classList.toggle("ready",!$("as_up").disabled);
  $("as_tg").hidden=S.al<1;$("as_tg").textContent=S.ao?"Auto-Dispatcher: ON":"Auto-Dispatcher: OFF";
  $("as_info").textContent=S.al<1?"Not owned yet.":"Level "+S.al+": keeps up to "+(S.al*5)+" mines fully staffed automatically.";
- var rows=[["Time played",Math.floor(S.age/60)+"m "+S.age%60+"s"],["Credits earned",fmt(S.earned)],["Trips completed",fmt(S.tc)],["Mines unlocked",nUn()+"/100"],["Mine level",S.L],["Workers",S.wr],["Mines at once",S.sl],["Worker speed level",S.sp],["Turrets",S.m+" (level "+S.t+")"],["Auto-Dispatcher level",S.al],["Puzzles solved",S.pn],["Puzzle every",fmt(PUZ[S.pi])+" energy"],["Next puzzle in",fmt(Math.max(0,S.nx-S.spent))+" energy"]];
+ var rows=[["Time played",Math.floor(S.age/60)+"m "+S.age%60+"s"],["Credits earned",fmt(S.earned)],["Trips completed",fmt(S.tc)],["Mines unlocked",nUn()+"/100"],["Mine level",S.L],["Workers",S.wr],["Mines at once",S.sl],["Worker speed level",S.sp],["Turrets",S.m+" (level "+S.t+")"],["Auto-Dispatcher level",S.al],["Special cave runs",S.spn||0],["Puzzles solved",S.pn],["Puzzle every",fmt(PUZ[S.pi])+" energy"],["Next puzzle in",fmt(Math.max(0,S.nx-S.spent))+" energy"]];
  ACH.forEach(function(a,i){rows.push([(S.ac[i]?"\u2713 ":"\u25a1 ")+a.n,S.ac[i]?"+1 coin":""])});
  $("statsbody").innerHTML=rows.map(function(q){return"<div class=srow><span>"+q[0]+"</span><b>"+q[1]+"</b></div>"}).join("");
  $("t-mines").classList.toggle("ready",MINES.some(function(m,i){return canUnlock(i)}));
@@ -538,7 +583,8 @@ pcv.addEventListener("pointerdown",ptap);
 document.addEventListener("keydown",function(e){if(!puz||puz.t!=="maze")return;var d={ArrowUp:0,KeyW:0,ArrowRight:1,KeyD:1,ArrowDown:2,KeyS:2,ArrowLeft:3,KeyA:3}[e.code];if(d!==undefined){e.preventDefault();mv(d)}});
 $("introb").onclick=function(){$("intro").hidden=true;try{localStorage.setItem("oaIntro","1")}catch(x){}};
 $("howto").onclick=function(){$("intro").hidden=false};
-[0,1,2,3,4,5,6,7,8,9].forEach(function(j){$("mb"+j).onclick=function(){var i=mp*10+j;if(S.un[i]){send(i,false);render()}else unlock(i)};$("mp"+j).onclick=function(){mp=j;render()}});
+[0,1,2,3,4,5,6,7,8,9].forEach(function(j){$("mb"+j).onclick=function(){if(mp===10){enterSpecial(j);return}var i=mp*10+j;if(S.un[i]){send(i,false);render()}else unlock(i)};$("mp"+j).onclick=function(){mp=j;render()}});
+$("mp10").onclick=function(){mp=10;render()};
 var PG=["mine","mines","work","up","auto","shop","stats"];
 PG.forEach(function(k){$("t-"+k).onclick=function(){
  var h=k==="mines"?$("host2"):$("host1");if($("scene").parentNode!==h)h.appendChild($("scene"));
@@ -564,10 +610,14 @@ var A=(function(){
  function rgb3(h,s,l){h=((h%360)+360)%360;s/=100;l/=100;var a=s*Math.min(l,1-l);function f(n){var k=(n+h/30)%12;return Math.round(255*(l-a*Math.max(-1,Math.min(k-3,9-k,1))))}return[f(0),f(8),f(4)]}
  function hex(h,s,l){return"#"+rgb3(h,s,l).map(function(x){return(x<16?"0":"")+x.toString(16)}).join("")}
  function rs(h,s,l){return rgb3(h,s,l).join(",")}
- function mk(h,amb){return{sky:[hex(h,50,5),hex(h,45,16),hex(h,40,32)],m1:hex(h,40,14),m2:hex(h,38,19),hill:hex(h,35,24),gr:[hex(h,30,26),hex(h,35,8)],cave:rs(h+30,80,60),c1:rs(h,80,60),c2:rs(h+60,70,65),rk:[hex(h,18,52),hex(h,25,22)],vein:hex(h+20,80,70),vg:rs(h+20,90,65),chip:hex(h,15,50),gem:[hex(h+180,80,88),hex(h+180,70,45),hex(h+180,70,65),hex(h+220,70,60),rs(h+180,80,60)],amb:amb}}
+ function mk(h,amb){return{h:h,sky:[hex(h,50,5),hex(h,45,16),hex(h,40,32)],m1:hex(h,40,14),m2:hex(h,38,19),hill:hex(h,35,24),gr:[hex(h,30,26),hex(h,35,8)],cave:rs(h+30,80,60),c1:rs(h,80,60),c2:rs(h+60,70,65),rk:[hex(h,18,52),hex(h,25,22)],vein:hex(h+20,80,70),vg:rs(h+20,90,65),chip:hex(h,15,50),gem:[hex(h+180,80,88),hex(h+180,70,45),hex(h+180,70,65),hex(h+220,70,60),rs(h+180,80,60)],amb:amb}}
  function mk2(i){var t=mk((i*47+((i>>3)*13))%360,["fly","ember","snow","void","bubbles","leaves","sparks","none"][(i*3+((i/10)|0))%8]);t.cv=i%5;t.dc=((i/5)|0)%5;t.sk=((i/2)|0)%4;t.fr=hex((i*47+((i>>3)*13)+15)%360,30,32);return t}
  for(i=0;i<6;i++){TH[i].cv=i%5;TH[i].dc=i%5;TH[i].sk=i%4}
  for(i=6;i<100;i++)TH.push(mk2(i));
+ [200,210,270,15,200,290].forEach(function(hh,k){TH[k].h=hh});
+ function mkS(k){var hh=[30,265,350,120,300,10,230,285,340,0][k],t=mk(hh,["ember","void","sparks","none","void","ember","sparks","void","ember","void"][k]);
+  t.sky=[hex(hh,60,3),hex(hh,55,9),hex(hh,50,18)];t.cv=[3,4,1,2,4,3,1,0,2,4][k];t.dc=[3,2,4,1,2,3,0,1,4,2][k];t.sk=[1,3,2,0,3,1,2,0,1,3][k];t.fr=hex(hh,40,28);t.vein=hex(hh,90,60);return t}
+ for(i=0;i<10;i++)TH.push(mkS(i));
  var ROCK=[[-38,0],[-42,-20],[-28,-38],[0,-46],[30,-40],[43,-18],[36,0]],spk=[],dm=[],nz=document.createElement("canvas"),npat;
  for(i=0;i<80;i++)spk.push({x:-42+rnd()*85,y:-46+rnd()*46,s:1+rnd()*2,l:rnd()<.4});
  for(i=0;i<24;i++)dm.push({x:440+rnd()*200,y:GY-80+rnd()*80,p:rnd()*6});
@@ -634,6 +684,26 @@ var A=(function(){
   else if(k===2){[566,722].forEach(function(x){c.fillStyle="#3a2d22";c.fillRect(x,GY-46,4,46);c.fillStyle="#f2b84b";c.fillRect(x-4,GY-52,12,8);glow(x+2,GY-50,34,"255,170,70",.5+.15*Math.sin(T*11+x))})}
   else if(k===3){[[572,18],[598,12],[714,16]].forEach(function(v){c.fillStyle=Q.rk[1];c.beginPath();c.arc(v[0],GY,v[1],PI,0);c.fill();c.fillStyle=Q.vein;c.fillRect(v[0]-4,GY-v[1]*.6,3,3);c.fillRect(v[0]+3,GY-v[1]*.4,3,3)})}
   else{[[568,10],[596,7],[716,9]].forEach(function(v,j){var col=j%2?Q.c1:Q.c2;c.fillStyle="#d8d2c4";c.fillRect(v[0]-2,GY-v[1],4,v[1]);c.fillStyle="rgb("+col+")";c.beginPath();c.arc(v[0],GY-v[1],8,PI,0);c.fill();glow(v[0],GY-v[1]-3,20,col,.3)})}}
+ function seeded(n){var a=(n*2654435761)>>>0;return function(){a=(a+0x6D2B79F5)|0;var t=Math.imul(a^(a>>>15),1|a);t=(t+Math.imul(t^(t>>>7),61|t))^t;return((t^(t>>>14))>>>0)/4294967296}}
+ var TEX={};
+ function texType(i){return(i*5+((i/12)|0))%12}
+ function texFor(i){if(TEX[i])return TEX[i];
+  var tc=document.createElement("canvas");tc.width=tc.height=64;var g=tc.getContext("2d"),r=seeded(i+7),h=TH[i].h,dk=hex(h,40,10),lt=hex(h,35,66),tp=texType(i),q,x,y;
+  g.lineCap="round";g.globalAlpha=.7;
+  if(tp===0){for(q=0;q<70;q++){g.fillStyle=r()<.5?dk:lt;g.fillRect(r()*64,r()*64,1+r()*2,1+r()*2)}}
+  else if(tp===1){for(q=0;q<6;q++){g.fillStyle=q%2?dk:lt;g.fillRect(0,q*11+r()*3,64,2+r()*3)}}
+  else if(tp===2){g.strokeStyle=dk;g.lineWidth=2;for(q=0;q<4;q++){y=q*16;g.beginPath();g.moveTo(0,y);g.lineTo(64,y);g.stroke();for(x=(q%2)*16;x<64;x+=32){g.beginPath();g.moveTo(x,y);g.lineTo(x,y+16);g.stroke()}}}
+  else if(tp===3){g.strokeStyle=lt;g.lineWidth=1.5;for(q=-64;q<128;q+=14){g.beginPath();g.moveTo(q,0);g.lineTo(q+64,64);g.stroke()}}
+  else if(tp===4){g.strokeStyle=lt;g.lineWidth=2;for(q=0;q<4;q++){g.beginPath();for(x=0;x<=64;x+=4){y=q*16+8+Math.sin(x/64*6.283*2+q)*4;if(x)g.lineTo(x,y);else g.moveTo(x,y)}g.stroke()}}
+  else if(tp===5){g.strokeStyle=dk;g.lineWidth=1.5;for(q=0;q<5;q++){g.beginPath();x=r()*64;y=r()*64;g.moveTo(x,y);for(var s2=0;s2<4;s2++){x+=(r()-.5)*24;y+=(r()-.5)*24;g.lineTo(x,y)}g.stroke()}}
+  else if(tp===6){g.strokeStyle=lt;g.lineWidth=1.5;for(y=0;y<64;y+=16)for(x=((y/16)%2)*16;x<64;x+=32){g.beginPath();g.arc(x,y+16,16,Math.PI,0);g.stroke()}}
+  else if(tp===7){g.strokeStyle=dk;g.lineWidth=1;g.beginPath();for(q=0;q<64;q+=10){g.moveTo(q,0);g.lineTo(q,64);g.moveTo(0,q);g.lineTo(64,q)}g.stroke()}
+  else if(tp===8){g.strokeStyle=lt;g.lineWidth=2;for(y=0;y<64;y+=16){g.beginPath();g.moveTo(0,y+2);for(x=8;x<=64;x+=8)g.lineTo(x,(x/8)%2?y+10:y+2);g.stroke()}}
+  else if(tp===9){g.strokeStyle=dk;g.lineWidth=1.5;for(q=0;q<14;q++){g.beginPath();g.arc(r()*64,r()*64,2+r()*5,0,6.283);g.stroke()}}
+  else if(tp===10){g.fillStyle=lt;for(y=8;y<64;y+=16)for(x=8+(((y-8)/16)%2)*8;x<64;x+=16){g.beginPath();g.arc(x,y,2.2,0,6.283);g.fill()}}
+  else{g.strokeStyle=dk;g.lineWidth=1.5;for(q=6;q<44;q+=9){g.beginPath();g.arc(32,32,q,0,6.283);g.stroke()}}
+  TEX[i]=c.createPattern(tc,"repeat");return TEX[i]}
+ function loss(txt){fl.push({x:90,y:GY-96,a:0,s:txt||"Robbed!",col:"#ff7a7a",sz:19});if(!calm)shk=Math.max(shk,9)}
  function drawTurret(i){
   var x=150+i*26,on=!S.pz&&!puz&&S.e>=DRAIN+S.res,cx=x+10,cy=GY-17,col=on?"hsl(174,"+Math.min(90,45+S.t*5)+"%,"+Math.min(65,45+S.t*2)+"%)":"#4a5563",a=Math.atan2(RY-cy,RX-cx);
   shd(x,20,24);c.fillStyle="#2c3a4e";c.fillRect(x,GY-7,20,7);c.fillStyle="#3b4d66";c.fillRect(x+3,GY-11,14,5);
@@ -664,6 +734,7 @@ var A=(function(){
   poly([[-16,GY],[-16,170],[80,120],[150,150],[250,95],[340,150],[420,115],[520,160],[600,100],[736,150],[736,GY]],Q.m1);
   poly([[-16,GY],[-16,190],[60,160],[170,182],[290,140],[400,185],[500,150],[620,180],[736,160],[736,GY]],Q.m2);c.restore();
   poly([[500,GY],[560,150],[610,118],[670,112],[736,128],[736,GY]],Q.hill);
+  c.globalAlpha=.45;poly([[500,GY],[560,150],[610,118],[670,112],[736,128],[736,GY]],texFor(S.last));c.globalAlpha=1;
   g=c.createLinearGradient(0,GY-60,0,GY);g.addColorStop(0,"rgba("+Q.cave+",0)");g.addColorStop(1,"rgba("+Q.cave+",.14)");c.fillStyle=g;c.fillRect(-16,GY-60,W+32,60);
   g=c.createLinearGradient(0,GY-120,0,GY);g.addColorStop(0,"rgba(0,0,0,0)");g.addColorStop(1,hx(Q.sky[2],.4));c.fillStyle=g;c.fillRect(-16,GY-120,W+32,120);
   caveShape();
@@ -672,6 +743,7 @@ var A=(function(){
   c.fillStyle="#3a2d22";c.fillRect(598,GY-84,2,18);c.fillStyle="#f2b84b";c.fillRect(594,GY-68,10,12);glow(599,GY-62,34,"255,190,90",.45+.15*Math.sin(T*13+Math.sin(T*5)));
   decor();
   g=c.createLinearGradient(0,GY,0,H);g.addColorStop(0,Q.gr[0]);g.addColorStop(1,Q.gr[1]);c.fillStyle=g;c.fillRect(-16,GY,W+32,H-GY+16);
+  c.globalAlpha=.3;c.fillStyle=texFor(S.last);c.fillRect(-16,GY,W+32,H-GY+16);c.globalAlpha=1;
   c.fillStyle="#3b4d66";c.fillRect(-16,GY,W+32,2);c.fillStyle="#1a2331";peb.forEach(function(q){c.fillRect(q.x,q.y,q.w,2)});
   [30,100,140,300,360,430,470,540].forEach(function(gx){poly([[gx,GY],[gx+2,GY-9],[gx+4,GY],[gx+6,GY-6],[gx+8,GY]],Q.hill)});
   shd(484,34,36);shd(112,20,16);shd(20,56,70);c.fillStyle="#4b3b2e";c.fillRect(498,GY-30,4,30);c.fillRect(484,GY-36,34,12);poly([[518,GY-36],[528,GY-30],[518,GY-24]],"#4b3b2e");c.fillStyle="#f2b84b";c.fillRect(490,GY-32,22,2);
@@ -682,7 +754,7 @@ var A=(function(){
   c.fillStyle=lit?"#ffd27a":"#2b3646";c.fillRect(30,GY-34,16,14);if(lit)glow(38,GY-27,70,"255,200,110",.3);
   for(k=0;k<Math.min(S.m,12);k++)drawTurret(k);
   sh.forEach(function(q){c.strokeStyle="#ffd36b";c.lineWidth=2.5;c.lineCap="round";ln(q.x-q.vx*.025,q.y-q.vy*.025,q.x,q.y);glow(q.x,q.y,8,"255,200,80",.8)});
-  drawWorkers();c.textAlign="right";c.font="bold 13px 'Trebuchet MS',sans-serif";c.fillStyle="rgba(255,255,255,.7)";c.fillText((S.last+1)+". "+MINES[S.last].n,W-14,H-28);c.textAlign="left";
+  drawWorkers();c.textAlign="right";c.font="bold 13px 'Trebuchet MS',sans-serif";c.fillStyle="rgba(255,255,255,.7)";c.fillText((S.last>=100?"Special "+(S.last-99):(S.last+1))+". "+M(S.last).n,W-14,H-28);c.textAlign="left";
   dm.forEach(function(q){glow(q.x+Math.sin(T*.6+q.p)*8,q.y+Math.cos(T*.5+q.p)*6,5,Q.cave,.35)});
   c.fillStyle="#05080c";c.beginPath();c.moveTo(-16,H+10);for(k=-16;k<W+16;k+=9){c.lineTo(k,H-5-Math.abs((k*37)%7)-(calm?0:Math.sin(k*.3+T*.8)*1.2));c.lineTo(k+4,H+10)}c.lineTo(W+16,H+10);c.closePath();c.fill();
   if(drone){var dy=70+Math.sin(drone.t*2)*26;
@@ -715,7 +787,7 @@ var A=(function(){
   if(drone&&Math.hypot(x-drone.x,y-(70+Math.sin(drone.t*2)*26))<34){drone=null;droneT=4+rnd()*6;droneReward()}});
  function frame(now){var dt=Math.min(.05,(now-last)/1000);last=now;step(dt);draw();finishTrips();updTrips();requestAnimationFrame(frame)}
  requestAnimationFrame(frame);
- return{done:done,fire:fire,celebrate:celebrate};
+ return{done:done,fire:fire,celebrate:celebrate,loss:loss,texInfo:function(i){return texType(i)+"|"+TH[i].h}};
 })();
 mp=(S.last/10)|0;
 buildAuto();userUI();
