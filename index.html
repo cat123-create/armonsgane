@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="game-version" content="11">
+<meta name="game-version" content="12">
 <title>Ore &amp; Amps</title>
 <style>
 :root{--bg:#0b1220;--panel:#18222f;--line:#2f4259;--text:#e8edf3;--dim:#93a1b3;--en:#4fd1c5;--cr:#f2b84b;--co:#c792ea;--bad:#ff7a7a}
@@ -312,6 +312,21 @@ button.ready {
 .frm label input{width:100%}
 .frm{margin-top:12px}
 </style>
+<style>
+#away{position:fixed;inset:0;background:rgba(5,8,14,.82);display:flex;align-items:center;justify-content:center;z-index:45;padding:16px}
+#away .box{max-width:420px;width:100%;background:linear-gradient(145deg,#1b2d43,#0e1726);border:1px solid #50f0d0;border-radius:18px;padding:18px;box-shadow:0 20px 80px #0009}
+#away p{line-height:1.5;margin:8px 0}
+#evb{position:fixed;left:8px;right:8px;bottom:calc(78px + env(safe-area-inset-bottom));z-index:30;border-radius:14px;padding:10px 12px;display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;font-size:.92rem;box-shadow:0 8px 28px #0007}
+#evb.good{background:linear-gradient(110deg,#6b4d10,#2c2208);border:1px solid #ffc45c;color:#fff3d0}
+#evb.bad{background:linear-gradient(110deg,#5a1a22,#2a0c12);border:1px solid #ff6a7a;color:#ffd8dc}
+#evb .tm{font-weight:700;margin-left:4px}
+#tabs{grid-template-columns:repeat(8,1fr)!important}
+#tabs button{font-size:.58rem}
+#presbody p{margin:6px 0;line-height:1.45}
+#presbody ul{margin:6px 0 6px 18px;padding:0;color:var(--dim);font-size:.9rem;line-height:1.5}
+.pbig{font-size:1.5rem;font-weight:800;color:var(--cr)}
+.sh{margin:12px 0 2px;color:var(--cr);font-weight:700;font-size:.85rem;letter-spacing:.5px;text-transform:uppercase}
+</style>
 </head>
 <body>
 <div id="toast" role="status"></div>
@@ -342,7 +357,7 @@ button.ready {
  <div id="aip" hidden><p class="note">Progress does not sync by itself between devices. On your other device, open the Stats tab, tap Make save code, then paste it here. Your progress and password come with it.</p><textarea id="aic" rows="4" spellcheck="false" placeholder="Paste your save code here"></textarea><button class="big" id="aib" style="margin-top:8px">Import</button></div>
 </div></div>
 <header id="hud"><div class="in">
- <div class="top"><div><h1>Ore &amp; Amps</h1><div class="note" id="usr" style="margin:0"></div></div><div><button id="howto" class="sm">How to play</button> <button id="snd" class="sm">Sound: on</button> <button id="acct" class="sm"></button></div></div>
+ <div class="top"><div><h1>Ore &amp; Amps</h1><div class="note" id="usr" style="margin:0"></div></div><div><button id="howto" class="sm">How to play</button> <button id="snd" class="sm">Sound: on</button> <button id="mus" class="sm">Music: off</button> <button id="acct" class="sm"></button></div></div>
  <div class="pills"><div class="pill" id="en"><b>0</b><span>Energy</span></div><div class="pill" id="cr"><b>0</b><span>Credits</span></div><div class="pill" id="co"><b>0</b><span>Coins</span></div></div>
  <div class="bar" title="Mines unlocked out of 100"><i id="prog"></i></div>
 </div></header>
@@ -352,7 +367,7 @@ button.ready {
 
 <div id="p-mine">
 <div id="host1"><canvas id="scene" width="720" height="260" role="img" aria-label="Your workers walk to the mine and come back with ore. Turrets fire as they mine."></canvas></div>
-<div class="chips"><span id="chw"></span><span id="chs"></span><span id="chv"></span></div>
+<div class="chips"><span id="chw"></span><span id="chs"></span><span id="chv"></span><span id="chp" hidden></span></div>
 <section>
  <h2>Crew</h2>
  <div class="row"><button class="big" id="crew">Send workers to the best mines</button><button id="gen" hidden>Emergency generator (+60 energy)</button></div>
@@ -425,28 +440,45 @@ button.ready {
 <section><h2>Stats</h2><div id="statsbody"></div></section>
 <section><h2>Move to another device</h2><p class="note">Progress does not sync by itself. To play the same account on another device: make a save code here, copy it, then on that device choose "Use a save code" on the login screen and paste it. Keep the code private, because it works like a password.</p><div class="row" style="margin-top:8px"><button id="mkcode">Make save code</button><button id="cpcode" hidden>Copy code</button></div><textarea id="codebox" readonly rows="4" spellcheck="false" hidden></textarea><p class="note" id="codemsg"></p></section>
 </div>
+<div id="p-pres" hidden>
+<section><h2>Prestige</h2><div id="presbody"></div><div class="row" style="margin-top:8px"><button id="presbtn" class="big"></button></div></section>
+<section><h2>Offline earnings</h2><p class="note">When you close the game or switch away, your turrets and Auto-Dispatcher keep working at 10% speed. They stop the moment they would reach a puzzle, or when they run out of energy, so the game is never fully AFK. A welcome-back card tells you what they earned.</p></section>
+</div>
 <footer><button id="reset" class="sm">Reset game</button></footer>
 </main>
-<nav id="tabs"><button id="t-mine" class="on"><b>&#127968;</b>Base</button><button id="t-mines"><b>&#9935;</b>Mines</button><button id="t-work"><b>&#128119;</b>Workers</button><button id="t-up"><b>&#11014;</b>Upgrades</button><button id="t-auto"><b>&#129302;</b>Auto</button><button id="t-shop"><b>&#128722;</b>Shop</button><button id="t-stats"><b>&#128202;</b>Stats</button></nav>
+<div id="evb" hidden></div>
+<div id="away" hidden><div class="box"><h2>Welcome back!</h2><p id="away_t"></p><div class="row" style="margin-top:12px"><button class="big" id="away_ok">Nice</button></div></div></div>
+<nav id="tabs"><button id="t-mine" class="on"><b>&#127968;</b>Base</button><button id="t-mines"><b>&#9935;</b>Mines</button><button id="t-work"><b>&#128119;</b>Workers</button><button id="t-up"><b>&#11014;</b>Upgrades</button><button id="t-auto"><b>&#129302;</b>Auto</button><button id="t-shop"><b>&#128722;</b>Shop</button><button id="t-stats"><b>&#128202;</b>Stats</button><button id="t-pres"><b>&#11088;</b>Prestige</button></nav>
 <script>
 window.startGame=function(USER){
 var KEY=USER?"oreAndAmps3_"+USER.toLowerCase():null,RATE=4,COIN=80,DRAIN=4,PUZ=[750,1500,3000,75000,500000,2000000,10000000],PUZC=[0,150,700,2500,25000,250000,2500000];
 var $=function(id){return document.getElementById(id)};
-function fresh(){return{e:1000,c:0,k:0,L:1,sp:0,sl:1,wr:1,m:0,t:0,earned:0,age:0,won:0,ms:0,spent:0,nx:750,pi:0,v:11,spn:0,spd:[],pn:0,tc:0,last:0,un:[1],tr:[],pz:0,res:60,ac:[],ab:{},al:0,ao:1}}
+function fresh(){return{e:1000,c:0,k:0,L:1,sp:0,sl:1,wr:1,m:0,t:0,earned:0,age:0,won:0,ms:0,spent:0,nx:750,pi:0,v:12,pr:0,bst:0,jp:0,lk:0,pf:0,dr:0,evn:0,off:0,ls:0,spn:0,spd:[],pn:0,tc:0,last:0,un:[1],tr:[],pz:0,res:60,ac:[],ab:{},al:0,ao:1}}
 function load(){if(!KEY){try{var g=sessionStorage.getItem("oa_guest");if(g){sessionStorage.removeItem("oa_guest");var o=JSON.parse(g);return o&&typeof o.e==="number"?o:null}}catch(x){}return null}try{var s=JSON.parse(localStorage.getItem(KEY));return s&&typeof s.e==="number"?s:null}catch(x){return null}}
 function migrate(o){var f=fresh();for(var k in f)if(o[k]===undefined)o[k]=f[k];o.v=f.v;return o}
-function save(){if(!KEY)return;try{localStorage.setItem(KEY,JSON.stringify(S))}catch(x){}}
+function save(){if(!KEY)return;S.ls=Date.now();try{localStorage.setItem(KEY,JSON.stringify(S))}catch(x){}}
 var S=migrate(load()||fresh()),logs=[],muted=false,ac=null,prev={c:0,e:0,k:0},tt=0;
 S.ms=S.ms||0;S.tr=S.tr||[];S.un=S.un||[1];S.ac=S.ac||[];S.last=S.last||0;S.tc=S.tc||0;if(S.nx-S.spent>PUZ[S.pi])S.nx=S.spent+PUZ[S.pi];
 var MS=[100,500,1000,2500,5000,10000,25000,50000,1e5,1e6,1e7,1e8,1e9,1e10,1e11,1e12,1e15,1e20,1e30,1e40,1e50,1e60];
-var lastSfx=0;
+var lastSfx=0,vol=1,music=false,mq=0;
+try{var pv=JSON.parse(localStorage.getItem("oa_snd")||"{}");if(typeof pv.v==="number")vol=pv.v;music=!!pv.m}catch(x){}
+muted=(vol===0);
+function saveSnd(){try{localStorage.setItem("oa_snd",JSON.stringify({v:vol,m:music}))}catch(x){}}
+function actx(){ac=ac||new(window.AudioContext||window.webkitAudioContext)();if(ac.state==="suspended"&&ac.resume)ac.resume();return ac}
+function tone(f1,f2,d,ty,g,dl){var c=actx(),o=c.createOscillator(),gn=c.createGain(),t=c.currentTime+(dl||0);
+ o.type=ty;o.frequency.setValueAtTime(f1,t);o.frequency.exponentialRampToValueAtTime(f2,t+d);
+ gn.gain.setValueAtTime(Math.max(.0002,g*vol),t);gn.gain.exponentialRampToValueAtTime(.0001,t+d);
+ o.connect(gn);gn.connect(c.destination);o.start(t);o.stop(t+d+.02)}
+var BIGSFX={mile:1,jack:1,pres:1,evt:1,bad:1};
 function sfx(k){
- if(muted)return;var tn=Date.now();if(tn-lastSfx<60&&k!=="mile"&&k!=="jack")return;lastSfx=tn;
- try{ac=ac||new(window.AudioContext||window.webkitAudioContext)();
- var F={hit:[200,320,.08,"square",.05],crit:[500,1000,.25,"triangle",.12],jack:[400,1600,.5,"triangle",.14],buy:[440,740,.15,"sine",.12],coin:[900,1300,.1,"sine",.1],mile:[520,1560,.6,"triangle",.14],no:[160,100,.15,"sawtooth",.06],t0:[262,262,.3,"sine",.14],t1:[330,330,.3,"sine",.14],t2:[392,392,.3,"sine",.14],t3:[523,523,.3,"sine",.14]}[k],o=ac.createOscillator(),g=ac.createGain(),t=ac.currentTime;
- o.type=F[3];o.frequency.setValueAtTime(F[0],t);o.frequency.exponentialRampToValueAtTime(F[1],t+F[2]);
- g.gain.setValueAtTime(F[4],t);g.gain.exponentialRampToValueAtTime(.001,t+F[2]);
- o.connect(g);g.connect(ac.destination);o.start(t);o.stop(t+F[2]);}catch(x){}}
+ if(muted)return;var tn=Date.now();if(tn-lastSfx<60&&!BIGSFX[k])return;lastSfx=tn;
+ try{
+ if(k==="pres"){[392,523,659,784,1047].forEach(function(f,q){tone(f,f,.4,"triangle",.14,q*.12)});return}
+ if(k==="evt"){tone(660,660,.15,"sine",.12);tone(880,880,.3,"sine",.12,.15);return}
+ var F={hit:[200,320,.08,"square",.05],crit:[500,1000,.25,"triangle",.12],jack:[400,1600,.5,"triangle",.14],buy:[440,740,.15,"sine",.12],coin:[900,1300,.1,"sine",.1],mile:[520,1560,.6,"triangle",.14],no:[160,100,.15,"sawtooth",.06],bad:[220,80,.5,"sawtooth",.08],tink:[1400,900,.05,"square",.02],t0:[262,262,.3,"sine",.14],t1:[330,330,.3,"sine",.14],t2:[392,392,.3,"sine",.14],t3:[523,523,.3,"sine",.14]}[k];
+ if(F)tone(F[0],F[1],F[2],F[3],F[4])}catch(x){}}
+var SCALE=[261.6,293.7,329.6,392,440,523.3,587.3,659.3];
+function musicTick(){if(!music||muted)return;var n=SCALE[(mq*3+((mq>>2)%3))%8];mq++;tone(n,n,1.6,"sine",.045);if(mq%4===1)tone(n/2,n/2,2.2,"sine",.05)}
 function buzz(p){if(!muted)try{navigator.vibrate&&navigator.vibrate(p)}catch(x){}}
 function toast(t){var el=$("toast");el.textContent=t;el.classList.add("on");clearTimeout(tt);tt=setTimeout(function(){el.classList.remove("on")},2600)}
 function miles(){while(S.ms<MS.length&&S.earned>=MS[S.ms]){toast(fmt(MS[S.ms])+" credits earned!");sfx("mile");A.celebrate();S.ms++}}
@@ -487,8 +519,9 @@ function capOf(i){return 10*Math.pow(4,i)}
 function qual(){return Math.min(1,.4+.06*(S.L-1))}
 function yieldOf(i){return i>=100?yieldNow():capOf(i)*qual()}
 function yieldNow(){return yieldOf(bestMine())}
-function tripCost(i){return i>=100?SPECIAL[i-100].en:6+Math.round(i*.7)}
-function tripTime(i){return i>=100?Math.max(3,SPECIAL[i-100].t/(1+.06*S.sp)):Math.max(.8,(3.5+i*.03)/(1+.12*S.sp))}
+function tripCost(i){var c=i>=100?SPECIAL[i-100].en:6+Math.round(i*.7);return EV&&EV.id==="surge"?Math.max(1,Math.ceil(c/2)):c}
+function tripTime(i){var q=tripTime0(i);return EV&&EV.id==="cave"?q*1.5:q}
+function tripTime0(i){return i>=100?Math.max(3,SPECIAL[i-100].t/(1+.06*S.sp)):Math.max(.8,(3.5+i*.03)/(1+.12*S.sp))}
 var SPMAX=20,SLMAX=100,WRMAX=500,PERMINE=5,wpg=0;
 function upCost(){return Math.ceil(3*Math.pow(1.32,S.L-1))}
 function spCost(){return Math.ceil(4*Math.pow(1.45,S.sp))}
@@ -532,7 +565,7 @@ function enterSpecial(k){if(!canEnter(k))return false;var c=SPECIAL[k],f=feeOf(k
 function resolveSpecial(t){var k=t.i-100,c=SPECIAL[k],r=Math.random(),acc=0,o=c.o[c.o.length-1],q,Y=specialUnit(k),parts=[],bad=false,big=0;
  for(q=0;q<c.o.length;q++){acc+=c.o[q].p;if(r<acc){o=c.o[q];break}}
  o.a.forEach(function(e){var kd=e[0],v=e[1],l;
-  if(kd==="cr"){var g=Math.round(Y*v*(.9+Math.random()*.2));gain(g);parts.push("+"+fmt(g)+" credits");big=Math.max(big,v)}
+  if(kd==="cr"){var g=Math.round(Y*v*(.9+Math.random()*.2)*bonus());gain(g);S.bst=Math.max(S.bst||0,g);parts.push("+"+fmt(g)+" credits");big=Math.max(big,v)}
   else if(kd==="co"){S.k+=v;parts.push("+"+v+" coins")}
   else if(kd==="sc"){l=Math.floor(S.c*v);S.c-=l;parts.push("-"+fmt(l)+" credits");bad=true}
   else if(kd==="se"){l=Math.floor(S.e*v);S.e-=l;parts.push("-"+fmt(l)+" energy");bad=true}
@@ -547,16 +580,16 @@ function resolveSpecial(t){var k=t.i-100,c=SPECIAL[k],r=Math.random(),acc=0,o=c.
 function reward(t){if(t.x){resolveSpecial(t);return}var m=MINES[t.i],r=Math.random(),tag="",mul=1,cap=capOf(t.i),g;
  if(r<.02){tag="JACKPOT!"}else if(r<.12){mul=1.6;tag="Lucky strike!"}
  if(Math.random()<m.gem){mul*=1.25;tag=tag||"Gem!"}
- g=tag==="JACKPOT!"?cap:Math.min(cap,yieldOf(t.i)*(.85+Math.random()*.15)*mul);g=Math.max(1,Math.round(g));gain(g);S.tc++;
+ g=tag==="JACKPOT!"?cap:Math.min(cap,yieldOf(t.i)*(.85+Math.random()*.15)*mul);g=Math.max(1,Math.round(g*bonus()));gain(g);S.tc++;S.bst=Math.max(S.bst||0,g);if(tag==="JACKPOT!")S.jp++;else if(tag==="Lucky strike!")S.lk++;
  A.done(g,tag);sfx(tag==="JACKPOT!"?"jack":tag?"crit":"coin");if(tag)buzz(tag==="JACKPOT!"?[40,30,80]:25);
  say(m.n+": +"+fmt(g)+(tag?" ("+tag+")":""));miles()}
 function finishTrips(){var now=Date.now(),dn=false;
  for(var q=S.tr.length-1;q>=0;q--){var t=S.tr[q];if(now>=t.s+t.d*1000){S.tr.splice(q,1);reward(t);dn=true}}
  if(dn){autoDispatch();render()}}
 function autoDispatch(){if(!S.al||!S.ao||puz)return;var ms={},n=0,i;S.tr.forEach(function(t){if(t.a&&!ms[t.i]){ms[t.i]=1;n++}});
- hold=true;for(i=99;i>=0;i--){if(!S.un[i])continue;if(!ms[i]&&n>=S.al*5)continue;
-  var did=false;while(S.e>=tripCost(i)+S.res&&canSend(i)&&send(i,true))did=true;if(did&&!ms[i]){ms[i]=1;n++}}
- hold=false;if(!puz&&S.spent>=S.nx)openPuzzle()}
+ hold=true;try{for(i=99;i>=0;i--){if(!S.un[i])continue;if(!ms[i]&&n>=S.al*5)continue;
+  var did=false;while(S.e>=tripCost(i)+(S.tr.length?S.res:0)&&canSend(i)&&send(i,true))did=true;if(did&&!ms[i]){ms[i]=1;n++}}}finally{hold=false}
+ if(!puz&&S.spent>=S.nx)openPuzzle()}
 function sendCrew(){var any=false,i;hold=true;for(i=99;i>=0;i--){while(canSend(i)&&send(i,false))any=true}hold=false;if(any&&!puz&&S.spent>=S.nx)openPuzzle();
  if(!any)say(puz?"Solve the puzzle first.":S.tr.length>=S.wr?"All your workers are busy.":"No free mine slots, or not enough energy.");render()}
 function sendWorker(k){if(k>=S.wr||tripOf(k)||puz)return;for(var i=99;i>=0;i--){if(canSend(i)){send(i,false,k);break}}render()}
@@ -572,8 +605,8 @@ function buyMiner(){if(S.k<minerCost())return;S.k-=minerCost();S.m++;say("Turret
 function buyTurret(){if(S.t>=TMAX||S.c<turCost())return;S.c-=turCost();S.t++;say("Turrets upgraded to level "+S.t+". They now mine "+(S.t*30)+"% faster.");sfx("buy");render()}
 function puzGap(){return PUZ[S.pi]}
 function upPuz(){if(S.pi>=PUZ.length-1||S.k<PUZC[S.pi+1])return;S.k-=PUZC[S.pi+1];S.pi++;if(!puz)S.nx=S.spent+PUZ[S.pi];say("Puzzles now appear every "+fmt(PUZ[S.pi])+" energy.");sfx("buy");render()}
-function droneReward(){var r=Math.random(),t;
- if(r<.5){var g=Math.round(Math.max(40,yieldNow()*1.5));gain(g);t="Golden drone! +"+fmt(g)+" credits"}
+function droneReward(){var r=Math.random(),t;S.dr++;
+ if(r<.5){var g=Math.round(Math.max(40,yieldNow()*1.5)*bonus());gain(g);t="Golden drone! +"+fmt(g)+" credits"}
  else if(r<.95){S.e+=50;t="Golden drone! +50 energy"}
  else{S.k+=1;t="Golden drone! +1 coin"}
  toast(t);sfx("mile");A.celebrate();say(t);miles();render()}
@@ -659,11 +692,11 @@ function showP(){var m=puz.t==="maze";pzLast=performance.now();
  $("pzq").textContent=m?"Guide the miner to the gold exit. Tap the maze, use the arrow buttons, or press the arrow keys."+(puz.vis<99?" It is dark, so you can only see nearby.":"")+(puz.keys.length?" Find the glowing blue key to unlock the red exit.":""):"Tap pipes to rotate them. Connect the green entrance on the left to the gold exit on the right.";
  $("pzd").hidden=!m;$("pzn").textContent=m?"Time left: "+Math.ceil(puz.tl)+"s. If time runs out you lose 30 energy.":"Taps left: "+puz.taps+". If you run out you lose 30 energy.";
  if(!pzRun){pzRun=true;pzLoop()}}
-function openPuzzle(){newP();showP()}
+function openPuzzle(){if(!$("away").hidden)return;newP();showP()}
 function solveP(){if(!puz)return;
  S.e+=20;S.pn++;S.nx+=puzGap();if(S.nx<=S.spent)S.nx=S.spent+puzGap();puz=null;$("pzl").hidden=true;
- toast("Puzzle solved! +20 energy");sfx("mile");buzz([30,20,30]);A.celebrate();say("Puzzle solved: +20 energy.");miles();render()}
-function failP(why){var m=puz&&puz.t==="maze";S.e=Math.max(0,S.e-30);sfx("no");buzz(120);
+ safe(autoDispatch);toast("Puzzle solved! +20 energy");sfx("mile");buzz([30,20,30]);A.celebrate();say("Puzzle solved: +20 energy.");miles();render()}
+function failP(why){var m=puz&&puz.t==="maze";S.pf++;S.e=Math.max(0,S.e-30);sfx("no");buzz(120);
  puz=m?pipeP(S.pn>>1):mazeP(S.pn>>1);showP();$("pzn").textContent=(why||"Failed!")+" -30 energy. Here is a different puzzle.";render()}
 function mv(d){var p=puz;if(!p||p.t!=="maze")return;
  if(!(p.w[p.py*p.n+p.px]&(1<<d))){sfx("no");return}
@@ -686,7 +719,7 @@ var AB=[
 {id:"tu",n:"Auto Turret Buyer",cost:80,d:"Buys turrets when you have spare coins.",p1:"Coins to keep",v1:0,p2:"Stop at this many turrets",v2:20},
 {id:"tg",n:"Auto Turret Upgrader",cost:100,d:"Upgrades your turrets with credits above the amount you keep.",p1:"Credits to keep",v1:1000},
 {id:"mi",n:"Auto Mine Unlocker",cost:200,d:"Unlocks the next mine as soon as you can afford it, keeping some coins back.",p1:"Coins to keep",v1:0}];
-function initAB(){S.ab=S.ab||{};S.al=S.al||0;if(S.ao===undefined)S.ao=1;if(S.res===undefined)S.res=60;AB.forEach(function(a){if(!S.ab[a.id])S.ab[a.id]={own:0,on:0,v1:a.v1,v2:a.v2||0}})}
+function initAB(){S.ab=S.ab||{};S.al=S.al||0;S.ao=(S.ao===0||S.ao===false)?0:1;if(S.res===undefined)S.res=60;AB.forEach(function(a){if(!S.ab[a.id])S.ab[a.id]={own:0,on:0,v1:a.v1,v2:a.v2||0}})}
 initAB();
 function adCost(){return Math.ceil(8*Math.pow(1.35,S.al))}
 function buyAD(){if(S.al>=20||S.k<adCost())return;S.k-=adCost();S.al++;if(S.al===1)S.ao=1;toast("Auto-Dispatcher level "+S.al+"!");sfx("buy");render()}
@@ -734,13 +767,70 @@ function paintThumbs(){if($("p-mines").hidden)return;var key=mp+":",fl=[],j,i;
  for(j=0;j<10;j++)(function(j){var cx0=$("mc"+j).getContext("2d");cx0.fillStyle="#0b1220";cx0.fillRect(0,0,840,340);setTimeout(function(){if(thumbKey!==key)return;var i2=mp*10+j,cx=$("mc"+j).getContext("2d");cx.clearRect(0,0,840,340);cx.drawImage(A.thumb(i2),0,0,840,340);if(fl[j]){cx.fillStyle="rgba(8,6,22,.7)";cx.fillRect(0,0,840,340);lockIcon(cx,420,170)}},j*35)})(j)}
 function pause(){if(S.m<1)return;S.pz=S.pz?0:1;say(S.pz?"Turrets paused. They use no energy.":"Turrets resumed.");sfx("buy");render()}
 function genny(){if(S.e<tripCost(0)&&S.c<10){S.e+=60;say("Generator coughs to life: +60 energy.");render()}}
-function tick(){S.age++;
+function safe(f){try{f()}catch(e){}}
+function pMul(){return 1+.5*S.pr}
+function pReq(){return 6+2*S.pr}
+function canPres(){return pReq()<100&&bestMine()>=pReq()}
+var EV=null,evNext=Date.now()+90000+Math.random()*90000;
+var EVT=[{id:"rush",n:"Rich Vein Rush",d:"All credits x2.",dur:45,good:1},{id:"surge",n:"Power Surge",d:"Trips cost half the energy.",dur:45,good:1},{id:"cave",n:"Cave-In!",d:"New trips take 50% longer.",dur:30,good:0},{id:"crate",n:"Supply Crate",d:"Grab it before it is gone!",dur:15,good:1},{id:"ovr",n:"Turret Overdrive",d:"Turrets mine 3x as much.",dur:30,good:1}];
+function evMul(){return EV&&EV.id==="rush"?2:1}
+function bonus(){return pMul()*evMul()}
+function startEv(){var pool=EVT.filter(function(t){return t.id!=="ovr"||S.m>0}),T=pool[Math.floor(Math.random()*pool.length)];
+ EV={id:T.id,n:T.n,d:T.d,good:T.good,end:Date.now()+T.dur*1000};S.evn++;
+ var b=$("evb");b.className=T.good?"good":"bad";b.hidden=false;
+ b.innerHTML="<span><b>"+T.n+"</b> "+T.d+" <span class=tm id=evt_t></span></span>"+(T.id==="crate"?"<button id=evg class='big sm'>Grab it!</button>":"");
+ if(T.id==="crate")$("evg").onclick=grabCrate;
+ toast(T.n+"! "+T.d);say("Event: "+T.n+". "+T.d);sfx(T.good?"evt":"bad");buzz(T.good?[30,20,30]:[120,40,120]);evStep()}
+function endEv(msg){if(msg)say(msg);EV=null;$("evb").hidden=true;evNext=Date.now()+150000+Math.random()*150000;render()}
+function grabCrate(){if(!EV||EV.id!=="crate")return;var amt=Math.round(25*tripCost(bestMine())+100);S.e+=amt;var t="Supply crate: +"+fmt(amt)+" energy";if(Math.random()<.25){S.k+=1;t+=" and +1 coin"}
+ toast(t);say(t);sfx("coin");A.celebrate();endEv()}
+function evStep(){var n=Date.now();if(EV){if(n>=EV.end)endEv(EV.id==="crate"?"The supply crate was carried off.":"Event over: "+EV.n+".");else{var el=$("evt_t");if(el)el.textContent=Math.ceil((EV.end-n)/1000)+"s"}}
+ else if(n>=evNext&&!puz&&$("away").hidden&&!spActive())startEv()}
+function dispWhy(){if(S.al<1)return"";if(!S.ao)return"Status: off.";if(puz)return"Status: paused for the puzzle.";if(spActive())return"Status: paused while a special cave runs.";
+ if(S.tr.length>=S.wr)return"Status: all "+S.wr+" workers are out on trips.";var c=Infinity,i;for(i=0;i<100;i++)if(S.un[i])c=Math.min(c,tripCost(i));
+ if(S.e<c)return"Status: waiting for energy (a trip costs "+c+").";if(S.tr.length&&S.e<c+S.res)return"Status: keeping "+S.res+" energy in reserve, so it is waiting for energy.";return"Status: working."}
+function dur(s){s=Math.floor(s);var h=Math.floor(s/3600),m=Math.floor(s%3600/60);return h?h+"h "+m+"m":m?m+"m "+(s%60)+"s":s+"s"}
+function offRate(){var e=0,c=0,i,yy;
+ if(S.m>0&&!S.pz){yy=yieldNow();e+=S.m*DRAIN;c+=S.m*.1*yy*(1+.3*S.t)}
+ if(S.al>=1&&S.ao){var ms=[],slots=Math.min(S.sl,S.al*5),left=S.wr;for(i=99;i>=0&&ms.length<slots;i--)if(S.un[i])ms.push(i);
+  ms.forEach(function(m){var w=Math.min(PERMINE,left);left-=w;if(w>0){var d=tripTime0(m);e+=w*tripCost(m)/d;c+=w*yieldOf(m)*.93/d}})}
+ return{e:e,c:c}}
+function offline(away){
+ if(puz||away<30)return;var r=offRate();if(r.e<=0)return;
+ var act=away*.10,avail=Math.max(0,S.e-(S.tr.length?S.res:0)),room=Math.max(0,S.nx-S.spent),tE=avail/r.e,tP=room/r.e,t=Math.min(act,tE,tP);
+ if(!(t>0))return;
+ var hitP=tP<=tE&&tP<=act,hitE=!hitP&&tE<=act,spend=Math.floor(t*r.e),earn=Math.round(t*r.c*pMul());
+ S.e-=spend;S.spent+=spend;if(hitP)S.spent=Math.max(S.spent,S.nx);
+ gain(earn);S.off+=earn;S.ls=Date.now();
+ var msg="You were away for "+dur(away)+". Your crew worked at 10% speed and earned "+fmt(earn)+" credits, using "+fmt(spend)+" energy."
+  +(hitP?" They stopped at a puzzle. Solve it to keep them going.":hitE?" They stopped because they ran out of energy.":"");
+ $("away_t").textContent=msg;$("away").hidden=false;say(msg);sfx("mile");miles();render()}
+var lastT=Date.now();
+function gapCheck(){var n=Date.now(),g=(n-lastT)/1000;lastT=n;if(g>30)offline(g)}
+function startOffline(){if(S.ls)offline((Date.now()-S.ls)/1000);lastT=Date.now()}
+$("away_ok").onclick=function(){$("away").hidden=true;if(!puz&&S.spent>=S.nx)openPuzzle()};
+function doPres(){if(!canPres())return;var np=S.pr+1;
+ if(!confirm("Prestige now? You become Prestige "+np+" and all credits are multiplied by x"+(1+.5*np)+" forever. You restart with your mines, upgrades, workers, turrets, coins and credits reset. You keep your prestige number, stats, achievements, Auto-Dispatcher, autobuyers and puzzle interval."))return;
+ var f=fresh();["earned","ms","age","ac","tc","pn","bst","jp","lk","pf","dr","evn","off","spn","spd","won","ab","al","ao","pi","res"].forEach(function(k){f[k]=S[k]});
+ f.pr=np;f.e=1000+500*np;f.nx=f.spent+PUZ[f.pi];S=f;puz=null;$("pzl").hidden=true;$("win").hidden=true;hold=false;mp=0;thumbKey="";initAB();
+ save();toast("Prestige "+np+"! Credits x"+pMul());say("You prestiged to number "+np+". Credits are now x"+pMul()+".");sfx("pres");buzz([60,30,60,30,120]);A.celebrate();render()}
+function updPres(){
+ var chp=$("chp");chp.hidden=S.pr<1;chp.textContent="Prestige "+S.pr+" (x"+pMul()+")";
+ var req=pReq(),h='<p>Prestige number: <span class="pbig">'+S.pr+'</span></p><p>Permanent bonus: all credits x<b>'+pMul()+'</b>. Next prestige: x<b>'+(1+.5*(S.pr+1))+'</b>.</p>';
+ if(req>=100)h+='<p>You reached the maximum prestige number.</p>';
+ else h+='<p>To prestige, unlock <b>Mine '+(req+1)+' ('+MINES[req].n+')</b>. Your best mine is Mine '+(bestMine()+1)+'.</p>';
+ h+='<p class="sh">What resets</p><ul><li>Energy, credits and coins (you restart with '+fmt(1000+500*(S.pr+1))+' energy)</li><li>Unlocked mines, mine level, speed, workers and mines at once</li><li>Turrets and turret levels</li></ul><p class="sh">What you keep</p><ul><li>Prestige number and its bonus</li><li>Stats and achievements</li><li>Auto-Dispatcher, autobuyers and your puzzle interval</li></ul>';
+ $("presbody").innerHTML=h;
+ $("presbtn").disabled=!canPres();$("presbtn").textContent=req>=100?"Maxed":canPres()?"Prestige now (become Prestige "+(S.pr+1)+")":"Locked: unlock Mine "+(req+1)+" first";$("presbtn").classList.toggle("ready",canPres());
+ $("t-pres").classList.toggle("ready",canPres())}
+$("presbtn").onclick=doPres;
+function tick(){S.age++;safe(gapCheck);safe(evStep);if(music)safe(musicTick);if(S.tr.length&&!puz&&Math.random()<.5)sfx("tink");
  var on=false,run=S.m>0&&!S.pz&&!puz;
- if(run){var yy=yieldNow();for(var i=0;i<S.m;i++){if(S.e>=DRAIN+S.res){S.e-=DRAIN;S.spent+=DRAIN;on=true;gain(0.1*yy*(1+0.3*S.t))}}}
+ if(run){var yy=yieldNow();for(var i=0;i<S.m;i++){if(S.e>=DRAIN+S.res){S.e-=DRAIN;S.spent+=DRAIN;on=true;gain(0.1*yy*(1+0.3*S.t)*bonus()*(EV&&EV.id==="ovr"?3:1))}}}
  A.fire(on);
- if(!puz){autos();autoDispatch()}
+ if(!puz){safe(autos);safe(autoDispatch)}
  if(!puz&&S.spent>=S.nx)openPuzzle();
- miles();achs();
+ safe(miles);safe(achs);
  if(!S.won&&S.un[99]){S.won=1;$("win").hidden=false}
  if(S.age%3===0)save();
  render()}
@@ -805,10 +895,11 @@ function render(){
   $("abp_"+a.id).hidden=!o.own;if(document.activeElement!==i1)i1.value=o.v1;if(a.p2){var i2=$("ab2_"+a.id);if(document.activeElement!==i2)i2.value=o.v2}});
  $("as_up").textContent=S.al>=20?"Auto-Dispatcher maxed":"Upgrade Auto-Dispatcher to level "+(S.al+1)+" ("+fmt(adCost())+" coins)";$("as_up").disabled=S.al>=20||S.k<adCost();$("as_up").classList.toggle("ready",!$("as_up").disabled);
  $("as_tg").hidden=S.al<1;$("as_tg").textContent=S.ao?"Auto-Dispatcher: ON":"Auto-Dispatcher: OFF";
- $("as_info").textContent=S.al<1?"Not owned yet.":"Level "+S.al+": keeps up to "+(S.al*5)+" mines fully staffed automatically.";
+ $("as_info").textContent=S.al<1?"Not owned yet.":"Level "+S.al+": keeps up to "+(S.al*5)+" mines fully staffed automatically. "+dispWhy();
  var rows=[["Time played",Math.floor(S.age/60)+"m "+S.age%60+"s"],["Credits earned",fmt(S.earned)],["Trips completed",fmt(S.tc)],["Mines unlocked",nUn()+"/100"],["Mine level",S.L],["Workers",S.wr],["Mines at once",S.sl],["Worker speed level",S.sp],["Turrets",S.m+" (level "+S.t+")"],["Auto-Dispatcher level",S.al],["Special cave runs",S.spn||0],["Puzzles solved",S.pn],["Puzzle every",fmt(PUZ[S.pi])+" energy"],["Next puzzle in",fmt(Math.max(0,S.nx-S.spent))+" energy"]];
+ rows.splice(2,0,["Prestige number",S.pr+" (credits x"+pMul()+")"],["Best single payout",fmt(S.bst||0)],["Jackpots",S.jp||0],["Lucky strikes",S.lk||0],["Golden drones caught",S.dr||0],["Puzzles failed",S.pf||0],["Events seen",S.evn||0],["Earned while away",fmt(S.off||0)]);
  ACH.forEach(function(a,i){rows.push([(S.ac[i]?"\u2713 ":"\u25a1 ")+a.n,S.ac[i]?"+1 coin":""])});
- $("statsbody").innerHTML=rows.map(function(q){return"<div class=srow><span>"+q[0]+"</span><b>"+q[1]+"</b></div>"}).join("");
+ $("statsbody").innerHTML=rows.map(function(q){return"<div class=srow><span>"+q[0]+"</span><b>"+q[1]+"</b></div>"}).join("");safe(updPres);
  $("t-mines").classList.toggle("ready",MINES.some(function(m,i){return canUnlock(i)}));
  $("t-up").classList.toggle("ready",["upm","upsp","upsl","upwr","bym","tur","uppz"].some(function(q){return !$(q).disabled}));
  $("t-auto").classList.toggle("ready",AB.some(function(a){return !S.ab[a.id].own&&S.k>=a.cost})||(S.al<20&&S.k>=adCost()));
@@ -837,7 +928,7 @@ $("introb").onclick=function(){$("intro").hidden=true;try{localStorage.setItem("
 $("howto").onclick=function(){$("intro").hidden=false};
 [0,1,2,3,4,5,6,7,8,9].forEach(function(j){$("mb"+j).onclick=function(){if(mp===10){enterSpecial(j);return}var i=mp*10+j;if(S.un[i]){send(i,false);render()}else unlock(i)};$("mp"+j).onclick=function(){mp=j;render()}});
 $("mp10").onclick=function(){mp=10;render()};
-var PG=["mine","mines","work","up","auto","shop","stats"];
+var PG=["mine","mines","work","up","auto","shop","stats","pres"];
 PG.forEach(function(k){$("t-"+k).onclick=function(){
  var h=k==="mines"?$("host2"):$("host1");if($("scene").parentNode!==h)h.appendChild($("scene"));
  PG.forEach(function(q){$("p-"+q).hidden=q!==k;$("t-"+q).classList.toggle("on",q===k)});window.scrollTo(0,0)}});
@@ -845,7 +936,10 @@ $("mkcode").onclick=function(){$("codemsg").textContent="";makeCode().then(funct
 $("cpcode").onclick=function(){var ta=$("codebox");ta.focus();ta.select();var ok=false;try{ok=document.execCommand("copy")}catch(x){}
  if(ok)$("codemsg").textContent="Copied! Paste it on your other device.";else if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(ta.value).then(function(){$("codemsg").textContent="Copied! Paste it on your other device."},function(){$("codemsg").textContent="Copy was blocked. The code is selected: press and hold, then choose Copy."});else $("codemsg").textContent="The code is selected: press and hold, then choose Copy."};
 $("acct").onclick=function(){if(USER){save();try{localStorage.removeItem("oa_user");sessionStorage.removeItem("oa_user")}catch(x){}location.reload()}else window.openAuth()};
-$("snd").onclick=function(){muted=!muted;this.textContent="Sound: "+(muted?"off":"on")};
+function sndLabel(){$("snd").textContent="Sound: "+(vol===0?"off":vol<1?"quiet":"on");$("mus").textContent="Music: "+(music?"on":"off")}
+$("snd").onclick=function(){vol=vol===1?.4:vol===.4?0:1;muted=(vol===0);saveSnd();sndLabel();sfx("buy")};
+$("mus").onclick=function(){music=!music;saveSnd();sndLabel();if(music)musicTick()};
+sndLabel();
 $("reset").onclick=function(){if(confirm("Erase your progress and start over?")){S=fresh();initAB();puz=null;$("pzl").hidden=true;$("win").hidden=true;save();say("New game. Good luck!");render()}};
 var A=(function(){
  var cv=$("scene"),c=cv.getContext("2d"),W=720,H=260,GY=200,HOMEX=76,MINEX=600,RX=648,RY=GY-22,PI=Math.PI,rnd=Math.random,i;
@@ -1190,11 +1284,11 @@ var A=(function(){
 mp=(S.last/10)|0;
 buildAuto();userUI();
 finishTrips();
-say("Welcome! Open the Mines tab and send a worker to the Copper Pit.");
-render();setInterval(tick,1000);setInterval(finishTrips,250);
+say("Welcome! Open the Mines tab and send a worker to the Copper Pit.");safe(startOffline);
+render();setInterval(tick,1000);setInterval(function(){finishTrips();if(!puz)safe(autoDispatch)},250);
 if(S.spent>=S.nx)openPuzzle();
 try{if(!localStorage.getItem("oaIntro"))$("intro").hidden=false}catch(x){}
-document.addEventListener("visibilitychange",function(){if(document.hidden)save()});
+document.addEventListener("visibilitychange",function(){if(document.hidden)save();else{safe(gapCheck);safe(finishTrips)}});
 if(window.addEventListener){window.addEventListener("pagehide",save);window.addEventListener("beforeunload",save)}
 document.addEventListener("keydown",function(e){if(e.target!==document.body)return;if(e.code==="Space"&&(!$("p-mine").hidden||!$("p-mines").hidden)){e.preventDefault();sendCrew()}else if(e.code==="KeyP")pause()});
 window.OAgame={makeCode:makeCode,prepareUpdate:function(){if(USER)save();else{try{sessionStorage.setItem("oa_guest",JSON.stringify(S))}catch(x){}}return true},adopt:function(u){USER=u;KEY="oreAndAmps3_"+u.toLowerCase();save();userUI();say("Account created. Your progress is now saved.")}};
