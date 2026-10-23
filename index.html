@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="game-version" content="19">
+<meta name="game-version" content="20">
 <meta name="https://jsonblob.com/01a16a9f-1520-7097-8afc-8257267c1c70/json" content="">
 <title>Ore &amp; Amps</title>
 <style>
@@ -460,7 +460,7 @@ body.notabs #tabs{display:none!important}
  <div class="row"><button id="be10">10 credits</button><button id="bemax">All credits</button></div>
  <p class="note">1 credit = 4 energy.</p>
 </section>
-<section id="crates"><h2>Mystery Crates</h2><p class="note">Spend coins to open a crate. Every crate always gives its small "Always" bonus, plus one random prize from its list. Prices grow as your mines get better. Boosts last a few minutes and the same boost cannot be stacked past 15 minutes. Luck makes jackpots, lucky strikes and gems more likely. Crates are a gamble, so some are worth more than they cost and some are not.</p><div id="cratebody"></div></section>
+<section id="crates"><h2>Mystery Crates</h2><p class="note">Spend coins to open a crate. Every crate always gives its small "Always" bonus, plus one random prize from its list. Prices grow as your mines get better. Boosts last a few minutes and the same boost cannot be stacked past 15 minutes. Luck makes jackpots, lucky strikes and gems more likely. Crates are a gamble, so some are worth more than they cost and some are not. Each crate also has a small chance (about 7 to 8 in 100) of something bad instead of a prize: an empty crate, a pickpocket, a gas leak, a curse or a slowdown. You always still get the "Always" bonus.</p><div id="cratebody"></div></section>
 </div>
  <p class="note">Coins cost far more than energy. They unlock mines and buy upgrades, workers, and turrets.</p>
 </section>
@@ -510,7 +510,7 @@ var $=function(id){return document.getElementById(id)};
 var SET={tb:1,nf:0,an:(window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches)?0:1,sk:1,ts:1,vb:1};
 try{var svS=JSON.parse(localStorage.getItem("oa_set")||"{}");for(var qS in svS)if(qS in SET)SET[qS]=svS[qS]}catch(x){}
 function saveSet(){try{localStorage.setItem("oa_set",JSON.stringify(SET))}catch(x){}}
-function fresh(){return{e:1000,c:0,k:0,L:1,sp:0,sl:1,wr:1,m:0,t:0,earned:0,age:0,won:0,ms:0,spent:0,nx:750,pi:0,v:19,lbn:"",lbk:"",cc:0,cro:0,bf:{},asc:0,cm:0,gd:[],gh:0,dly:"",stk:0,dc:0,pr:0,bst:0,jp:0,lk:0,pf:0,dr:0,evn:0,off:0,ls:0,spn:0,spd:[],pn:0,tc:0,last:0,un:[1],tr:[],pz:0,res:60,ac:[],ab:{},al:0,ao:1}}
+function fresh(){return{e:1000,c:0,k:0,L:1,sp:0,sl:1,wr:1,m:0,t:0,earned:0,age:0,won:0,ms:0,spent:0,nx:750,pi:0,v:20,lbn:"",lbk:"",cc:0,cro:0,bf:{},asc:0,cm:0,gd:[],gh:0,dly:"",stk:0,dc:0,pr:0,bst:0,jp:0,lk:0,pf:0,dr:0,evn:0,off:0,ls:0,spn:0,spd:[],pn:0,tc:0,last:0,un:[1],tr:[],pz:0,res:60,ac:[],ab:{},al:0,ao:1}}
 function load(){if(!KEY){try{var g=sessionStorage.getItem("oa_guest");if(g){sessionStorage.removeItem("oa_guest");var o=JSON.parse(g);return o&&typeof o.e==="number"?o:null}}catch(x){}return null}try{var s=JSON.parse(localStorage.getItem(KEY));return s&&typeof s.e==="number"?s:null}catch(x){return null}}
 function migrate(o){var f=fresh();for(var k in f)if(o[k]===undefined)o[k]=f[k];o.v=f.v;return o}
 function save(){if(!KEY)return;S.ls=Date.now();try{localStorage.setItem(KEY,JSON.stringify(S))}catch(x){}}
@@ -577,7 +577,7 @@ function qual(){return Math.min(1,.4+.06*(S.L-1))}
 function yieldOf(i){return i>=100?yieldNow():capOf(i)*qual()}
 function yieldNow(){return yieldOf(bestMine())}
 function tripCost(i){var c=i>=100?SPECIAL[i-100].en:6+Math.round(i*.7);return (EV&&EV.id==="surge")||bfOn("sv")?Math.max(1,Math.ceil(c/2)):c}
-function tripTime(i){var q=tripTime0(i);q=EV&&EV.id==="cave"?q*1.5:q;return bfOn("sp")?q/1.25:q}
+function tripTime(i){var q=tripTime0(i);q=EV&&EV.id==="cave"?q*1.5:q;if(bfOn("sl"))q*=1.5;return bfOn("sp")?q/1.25:q}
 function tripTime0(i){return i>=100?Math.max(3,SPECIAL[i-100].t/(1+.06*S.sp)):Math.max(.8,(3.5+i*.03)/(1+.12*S.sp))}
 var SPMAX=20,SLMAX=100,WRMAX=500,PERMINE=5,wpg=0;
 function upCost(){return Math.ceil(3*Math.pow(1.32,S.L-1))}
@@ -873,24 +873,25 @@ function doPres(){if(!canPres())return;var np=S.pr+1;
  f.pr=np;f.e=1000+500*np;f.nx=f.spent+PUZ[f.pi];S=f;puz=null;$("pzl").hidden=true;$("win").hidden=true;hold=false;mp=0;thumbKey="";initAB();
  save();toast("Prestige "+np+"! Credits x"+pMul());say("You prestiged to number "+np+". Credits are now x"+pMul()+".");sfx("pres");buzz([60,30,60,30,120]);A.celebrate();render()}
 function bfOn(k){var b=S.bf&&S.bf[k];return b&&b.e>Date.now()?b:null}
-function luckM(){var b=bfOn("lk");return (b?b.m:1)*(1+.05*(S.cc||0))}
+function luckM(){var b=bfOn("lk");return (b?b.m:1)*(bfOn("cu")?.5:1)*(1+.05*(S.cc||0))}
 function midM(){var b=bfOn("md");return b?b.m:1}
 function addBf(k,m,sec){S.bf=S.bf||{};var o=bfOn(k),now=Date.now(),end=Math.min(now+900000,(o?o.e:now)+sec*1000);S.bf[k]={e:end,m:Math.max(m||1,o&&o.m?o.m:1)}}
 var CRATES=[
- {id:"wood",n:"Wooden Crate",k:8,min:3,col:"#c28a4a",a:[[0,"en",8]],o:[[.40,"en",15],[.30,"lk",2,180],[.20,"cr",3],[.10,"sv",0,180]]},
- {id:"iron",n:"Iron Crate",k:30,min:8,col:"#c4d0e0",a:[[0,"en",20],[0,"cr",2]],o:[[.25,"lk",2.5,360],[.25,"sp",0,300],[.25,"cr",12],[.15,"sv",0,360],[.10,"co",2]]},
- {id:"gold",n:"Gold Crate",k:150,min:25,col:"#ffc45c",a:[[0,"en",40],[0,"cr",10],[0,"lk",1.5,120]],o:[[.30,"md",1.5,300],[.25,"lk",3,480],[.20,"cr",60],[.15,"ss",0,360],[.10,"co",3]]},
- {id:"dia",n:"Diamond Crate",k:700,min:80,col:"#7ae7ff",a:[[0,"en",80],[0,"cr",60],[0,"lk",2,300]],o:[[.30,"md",2,360],[.25,"cr",400],[.20,"ls",4,600],[.15,"co",2],[.08,"ch",0],[.02,"my",0]]}];
+ {id:"wood",n:"Wooden Crate",k:8,min:3,col:"#c28a4a",a:[[0,"en",8]],bad:[[.04,"em"],[.02,"sc",.05],[.02,"se",.05]],o:[[.40,"en",15],[.30,"lk",2,180],[.20,"cr",3],[.10,"sv",0,180]]},
+ {id:"iron",n:"Iron Crate",k:30,min:8,col:"#c4d0e0",a:[[0,"en",20],[0,"cr",2]],bad:[[.02,"em"],[.02,"sc",.08],[.02,"cu",.5,180],[.01,"sl",1,120]],o:[[.25,"lk",2.5,360],[.25,"sp",0,300],[.25,"cr",12],[.15,"sv",0,360],[.10,"co",2]]},
+ {id:"gold",n:"Gold Crate",k:150,min:25,col:"#ffc45c",a:[[0,"en",40],[0,"cr",10],[0,"lk",1.5,120]],bad:[[.02,"em"],[.02,"sc",.10],[.01,"se",.10],[.01,"cu",.5,240],[.01,"sl",1,180]],o:[[.30,"md",1.5,300],[.25,"lk",3,480],[.20,"cr",60],[.15,"ss",0,360],[.10,"co",3]]},
+ {id:"dia",n:"Diamond Crate",k:700,min:80,col:"#7ae7ff",a:[[0,"en",80],[0,"cr",60],[0,"lk",2,300]],bad:[[.01,"em"],[.02,"sc",.12],[.01,"se",.12],[.02,"cu",.5,300],[.01,"sl",1,180]],o:[[.30,"md",2,360],[.25,"cr",400],[.20,"ls",4,600],[.15,"co",2],[.08,"ch",0],[.02,"my",0]]}];
+CRATES.forEach(function(c){var bp=c.bad.reduce(function(a,x){return a+x[0]},0);c.o=c.o.map(function(x){return [x[0]*(1-bp)].concat(x.slice(1))}).concat(c.bad)});
 function cratePrice(c){return Math.max(c.min,Math.ceil(yieldNow()*c.k/COIN))}
 function mn(sec){return Math.round(sec/60)+" min"}
 function odesc(o){var t=o[1],v=o[2],q=o[3];
- return t==="en"?"Energy pack":t==="cr"?"Credits ("+v+" trips' worth)":t==="co"?"Coins ("+v+"x the price back)":t==="lk"?"Luck x"+v+" for "+mn(q):t==="md"?"Credits x"+v+" for "+mn(q):t==="sp"?"Workers 25% faster for "+mn(q):t==="sv"?"Trips cost half energy for "+mn(q):t==="ss"?"Faster workers and half-price trips for "+mn(q):t==="ls"?"Luck x4 and faster workers for 10 min":t==="ch"?"Lucky Charm: permanent +5% luck (max 10)":"Mythic bundle: credits x3 and luck x4 for 10 min, plus coins"}
+ return t==="em"?"BAD: the crate is empty":t==="sc"?"BAD: pickpocket, lose "+Math.round(v*100)+"% of credits":t==="se"?"BAD: gas leak, lose "+Math.round(v*100)+"% of energy":t==="cu"?"BAD: curse, luck x0.5 for "+mn(q):t==="sl"?"BAD: slowdown, trips 50% longer for "+mn(q):t==="en"?"Energy pack":t==="cr"?"Credits ("+v+" trips' worth)":t==="co"?"Coins ("+v+"x the price back)":t==="lk"?"Luck x"+v+" for "+mn(q):t==="md"?"Credits x"+v+" for "+mn(q):t==="sp"?"Workers 25% faster for "+mn(q):t==="sv"?"Trips cost half energy for "+mn(q):t==="ss"?"Faster workers and half-price trips for "+mn(q):t==="ls"?"Luck x4 and faster workers for 10 min":t==="ch"?"Lucky Charm: permanent +5% luck (max 10)":"Mythic bundle: credits x3 and luck x4 for 10 min, plus coins"}
 function buildCrates(){var h="";CRATES.forEach(function(c,i){
  h+='<div class="ccard" style="--tc:'+c.col+'"><div class="mh"><b>'+c.n+'</b><span class="note" id="cp_'+i+'"></span></div><div class="note">Always: '+c.a.map(odesc).join(", ")+'</div><ul>'+c.o.map(function(o){return"<li>"+Math.round(o[0]*100)+"% "+odesc(o)+"</li>"}).join("")+'</ul><button class="big" id="cb_'+i+'">Open</button></div>'});
  $("cratebody").innerHTML=h;CRATES.forEach(function(c,i){$("cb_"+i).onclick=function(){openCrate(i)}})}
 var lastCr=0,crT=0;
-function applyCrate(o,pr){var t=o[1],v=o[2],q=o[3],txt,big=0,g;
- if(t==="en"){g=Math.round(v*tripCost(bestMine())+100);S.e+=g;txt="+"+fmt(g)+" energy"}
+function applyCrate(o,pr){var t=o[1],v=o[2],q=o[3],txt,big=0,g,bad=0;
+ if(t==="em"){txt="The crate was empty.";bad=1}else if(t==="sc"){g=Math.floor(S.c*v);S.c-=g;txt="A pickpocket took "+fmt(g)+" credits";bad=1}else if(t==="se"){g=Math.floor(S.e*v);S.e-=g;txt="Gas leak! You lost "+fmt(g)+" energy";bad=1}else if(t==="cu"){S.bf=S.bf||{};S.bf.cu={e:Date.now()+q*1000,m:.5};txt="Cursed! Luck is halved for "+mn(q);bad=1}else if(t==="sl"){S.bf=S.bf||{};S.bf.sl={e:Date.now()+q*1000,m:1};txt="Slowdown! Trips take 50% longer for "+mn(q);bad=1}else if(t==="en"){g=Math.round(v*tripCost(bestMine())+100);S.e+=g;txt="+"+fmt(g)+" energy"}
  else if(t==="cr"){g=Math.round(yieldNow()*v*bonus());gain(g);txt="+"+fmt(g)+" credits";big=v>=60}
  else if(t==="co"){g=Math.ceil(pr*v);S.k+=g;txt="+"+fmt(g)+" coins";big=1}
  else if(t==="lk"){addBf("lk",v,q);txt="Luck x"+v+" for "+mn(q)}
@@ -901,23 +902,23 @@ function applyCrate(o,pr){var t=o[1],v=o[2],q=o[3],txt,big=0,g;
  else if(t==="ls"){addBf("lk",4,600);addBf("sp",1.25,600);txt="Luck x4 and faster workers for 10 min";big=1}
  else if(t==="ch"){if((S.cc||0)<10){S.cc=(S.cc||0)+1;txt="LUCKY CHARM! Permanent +5% luck ("+S.cc+"/10)";big=2}else{g=Math.round(yieldNow()*300*bonus());gain(g);txt="Charms are maxed, so: +"+fmt(g)+" credits";big=1}}
  else{addBf("md",3,600);addBf("lk",4,600);g=Math.ceil(pr*2);S.k+=g;txt="MYTHIC! Credits x3 and luck x4 for 10 min, +"+fmt(g)+" coins";big=2}
- return{t:txt,big:big}}
+ return{t:txt,big:big,bad:bad}}
 function openCrate(i){var c=CRATES[i],pr=cratePrice(c);if(puz){say("Solve the puzzle first.");return}if(S.k<pr)return;
  S.k-=pr;S.cro=(S.cro||0)+1;lastCr=i;
  var r=Math.random(),acc=0,o=c.o[c.o.length-1],q;for(q=0;q<c.o.length;q++){acc+=c.o[q][0];if(r<acc){o=c.o[q];break}}
  var ba=c.a.map(function(x){return applyCrate(x,pr).t}),res=applyCrate(o,pr),bx=$("crate").firstChild;bx.style.setProperty("--tc",c.col);
  $("crate_h").textContent=c.n;$("crate_ic").className="cic shake";$("crate_t").textContent="Opening...";$("crate_ok").disabled=true;$("crate_again").disabled=true;$("crate").hidden=false;
  sfx("hit");buzz(30);
- clearTimeout(crT);crT=setTimeout(function(){$("crate_ic").className="cic";$("crate_t").innerHTML="<b>Always:</b> "+ba.join(", ")+"<br><b>Prize:</b> "+res.t;$("crate_ok").disabled=false;
+ clearTimeout(crT);crT=setTimeout(function(){$("crate_ic").className="cic";$("crate_t").innerHTML="<b>Always:</b> "+ba.join(", ")+"<br><b>"+(res.bad?"Bad luck:":"Prize:")+"</b> "+res.t;$("crate_ok").disabled=false;
   $("crate_again").disabled=S.k<cratePrice(c)||!!puz;
-  sfx(res.big>=2?"jack":res.big?"crit":"coin");if(res.big){A.celebrate();buzz([40,30,80])}
+  if(res.bad){sfx("no");buzz([120,40,120]);A.loss("Bad luck!")}else{sfx(res.big>=2?"jack":res.big?"crit":"coin");if(res.big){A.celebrate();buzz([40,30,80])}}
   say(c.n+": "+ba.join(", ")+". Prize: "+res.t);miles();render()},750);render()}
 $("crate_ok").onclick=function(){$("crate").hidden=true;if(!puz&&S.spent>=S.nx)openPuzzle()};
 $("crate_again").onclick=function(){$("crate").hidden=true;openCrate(lastCr)};
 function updCrates(){
  CRATES.forEach(function(c,i){var pr=cratePrice(c);$("cp_"+i).textContent=fmt(pr)+" coins";$("cb_"+i).disabled=S.k<pr||!!puz;$("cb_"+i).textContent=puz?"Solve the puzzle first":S.k<pr?"Need "+fmt(pr)+" coins":"Open ("+fmt(pr)+" coins)";$("cb_"+i).classList.toggle("ready",S.k>=pr&&!puz)});
  var n=Date.now(),b=[],ml=function(k){var x=bfOn(k);if(!x)return 0;var s2=Math.ceil((x.e-n)/1000);return Math.floor(s2/60)+":"+("0"+(s2%60)).slice(-2)},x;
- if(x=ml("lk"))b.push("Luck x"+mulTxt(bfOn("lk").m)+" "+x);if(x=ml("md"))b.push("Credits x"+mulTxt(bfOn("md").m)+" "+x);if(x=ml("sp"))b.push("Fast "+x);if(x=ml("sv"))b.push("Half energy "+x);
+ if(x=ml("lk"))b.push("Luck x"+mulTxt(bfOn("lk").m)+" "+x);if(x=ml("md"))b.push("Credits x"+mulTxt(bfOn("md").m)+" "+x);if(x=ml("sp"))b.push("Fast "+x);if(x=ml("sv"))b.push("Half energy "+x);if(x=ml("cu"))b.push("Cursed "+x);if(x=ml("sl"))b.push("Slowed "+x);
  var el=$("chb");el.hidden=!b.length;el.textContent="Boosts: "+b.join(" | ")}
 buildCrates();
 function lbBase(){return String(LB_URL||"").replace(/\/+$/,"")}
