@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="game-version" content="26">
-<meta name="leaderboard-url" content="https://jsonblob.com/01a178c2-e3a0-734a-bfab-96bf5e2b2788">
+<meta name="game-version" content="27">
+<meta name="leaderboard-url" content="">
 <title>Ore &amp; Amps</title>
 <style>
 :root{--bg:#0b1220;--panel:#18222f;--line:#2f4259;--text:#e8edf3;--dim:#93a1b3;--en:#4fd1c5;--cr:#f2b84b;--co:#c792ea;--bad:#ff7a7a}
@@ -512,7 +512,7 @@ var $=function(id){return document.getElementById(id)};
 var SET={tb:1,nf:0,an:(window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches)?0:1,sk:1,ts:1,vb:1};
 try{var svS=JSON.parse(localStorage.getItem("oa_set")||"{}");for(var qS in svS)if(qS in SET)SET[qS]=svS[qS]}catch(x){}
 function saveSet(){try{localStorage.setItem("oa_set",JSON.stringify(SET))}catch(x){}}
-function fresh(){return{e:1000,c:0,k:0,L:1,sp:0,sl:1,wr:1,m:0,t:0,earned:0,age:0,won:0,ms:0,spent:0,nx:750,pi:0,v:26,lbn:"",lbk:"",cc:0,cro:0,bf:{},asc:0,cm:0,gd:[],gh:0,dly:"",stk:0,dc:0,pr:0,bst:0,jp:0,lk:0,pf:0,dr:0,evn:0,off:0,ls:0,spn:0,spd:[],pn:0,tc:0,last:0,un:[1],tr:[],pz:0,res:60,ac:[],ab:{},al:0,ao:1}}
+function fresh(){return{e:1000,c:0,k:0,L:1,sp:0,sl:1,wr:1,m:0,t:0,earned:0,age:0,won:0,ms:0,spent:0,nx:750,pi:0,v:27,lbn:"",lbk:"",cc:0,cro:0,bf:{},asc:0,cm:0,gd:[],gh:0,dly:"",stk:0,dc:0,pr:0,bst:0,jp:0,lk:0,pf:0,dr:0,evn:0,off:0,ls:0,spn:0,spd:[],pn:0,tc:0,last:0,un:[1],tr:[],pz:0,res:60,ac:[],ab:{},al:0,ao:1}}
 function load(){if(!KEY){try{var g=sessionStorage.getItem("oa_guest");if(g){sessionStorage.removeItem("oa_guest");var o=JSON.parse(g);return o&&typeof o.e==="number"?o:null}}catch(x){}return null}try{var s=JSON.parse(localStorage.getItem(KEY));return s&&typeof s.e==="number"?s:null}catch(x){return null}}
 function migrate(o){var f=fresh();for(var k in f)if(o[k]===undefined)o[k]=f[k];o.v=f.v;return o}
 function save(){if(!KEY)return;S.ls=Date.now();try{localStorage.setItem(KEY,JSON.stringify(S))}catch(x){}}
@@ -968,7 +968,7 @@ function lbLocal(){var rows=[],us={};try{us=JSON.parse(localStorage.getItem("oa_
 function gver(){var m=document.querySelector('meta[name="game-version"]');return m?m.getAttribute("content"):"?"}
 function lbRefresh(){
  var on=lbOn();$("lbjoin").hidden=!(on&&USER&&!S.lbn);
- $("ver").textContent="Game version "+gver();$("lbnote").textContent=on?"Ranked by total credits earned. "+(S.lbn?"You are playing as "+S.lbn+".":USER?"Join to appear on the board.":"Log in to join."):"The worldwide leaderboard is NOT switched on, so this only shows accounts on this device (that is why you only see yourself). To switch it on, open index.html, go to line 7, which looks like <meta name=\"leaderboard-url\" content=\"\">, and paste your jsonblob URL between the two quote marks after content= .";
+ $("ver").textContent="Game version "+gver();$("lbnote").textContent=on?"Ranked by total credits earned. "+(S.lbn?"You are playing as "+S.lbn+".":USER?"Join to appear on the board.":"Log in to join."):"Local leaderboard: ranks the accounts on this device by total credits earned.";
  if(!on){lbLocal();return}
  (lbBlobUrl()?bGet().then(function(o){return o.scores}):lbReq("/scores").then(function(r){if(!r.ok)throw 0;return r.json()})).then(function(o){
   var rows=[];Object.keys(o||{}).forEach(function(k){var r=o[k];if(r&&typeof r.n==="string"&&r.n.length<=16&&typeof r.m==="number"&&isFinite(r.m))rows.push(r)});
