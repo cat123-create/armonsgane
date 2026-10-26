@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="game-version" content="25">
+<meta name="game-version" content="26">
 <meta name="leaderboard-url" content="https://jsonblob.com/01a178c2-e3a0-734a-bfab-96bf5e2b2788">
 <title>Ore &amp; Amps</title>
 <style>
@@ -512,7 +512,7 @@ var $=function(id){return document.getElementById(id)};
 var SET={tb:1,nf:0,an:(window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches)?0:1,sk:1,ts:1,vb:1};
 try{var svS=JSON.parse(localStorage.getItem("oa_set")||"{}");for(var qS in svS)if(qS in SET)SET[qS]=svS[qS]}catch(x){}
 function saveSet(){try{localStorage.setItem("oa_set",JSON.stringify(SET))}catch(x){}}
-function fresh(){return{e:1000,c:0,k:0,L:1,sp:0,sl:1,wr:1,m:0,t:0,earned:0,age:0,won:0,ms:0,spent:0,nx:750,pi:0,v:25,lbn:"",lbk:"",cc:0,cro:0,bf:{},asc:0,cm:0,gd:[],gh:0,dly:"",stk:0,dc:0,pr:0,bst:0,jp:0,lk:0,pf:0,dr:0,evn:0,off:0,ls:0,spn:0,spd:[],pn:0,tc:0,last:0,un:[1],tr:[],pz:0,res:60,ac:[],ab:{},al:0,ao:1}}
+function fresh(){return{e:1000,c:0,k:0,L:1,sp:0,sl:1,wr:1,m:0,t:0,earned:0,age:0,won:0,ms:0,spent:0,nx:750,pi:0,v:26,lbn:"",lbk:"",cc:0,cro:0,bf:{},asc:0,cm:0,gd:[],gh:0,dly:"",stk:0,dc:0,pr:0,bst:0,jp:0,lk:0,pf:0,dr:0,evn:0,off:0,ls:0,spn:0,spd:[],pn:0,tc:0,last:0,un:[1],tr:[],pz:0,res:60,ac:[],ab:{},al:0,ao:1}}
 function load(){if(!KEY){try{var g=sessionStorage.getItem("oa_guest");if(g){sessionStorage.removeItem("oa_guest");var o=JSON.parse(g);return o&&typeof o.e==="number"?o:null}}catch(x){}return null}try{var s=JSON.parse(localStorage.getItem(KEY));return s&&typeof s.e==="number"?s:null}catch(x){return null}}
 function migrate(o){var f=fresh();for(var k in f)if(o[k]===undefined)o[k]=f[k];o.v=f.v;return o}
 function save(){if(!KEY)return;S.ls=Date.now();try{localStorage.setItem(KEY,JSON.stringify(S))}catch(x){}}
@@ -950,7 +950,7 @@ function lbJoin(){if(!USER){lbMsg("Log in with an account first, so your nicknam
  claimName(n).then(function(r){$("lbgo").disabled=false;
   if(r==="ok"){S.lbn=n;save();lbMsg("You joined as "+n+".");lbSubmit();lbRefresh();render()}
   else if(r==="taken")lbMsg("That nickname is already taken. Try another one.");
-  else lbMsg("Could not reach the leaderboard. Try again later.")}).catch(function(){$("lbgo").disabled=false;lbMsg("Could not reach the leaderboard. Try again later.")})}
+  else lbMsg("Could not reach the leaderboard. Try again later.")}).catch(function(e){$("lbgo").disabled=false;lbMsg("Could not reach the leaderboard. Reason: "+(e&&e.message?e.message:"unknown")+(e&&e.message==="Failed to fetch"?" (jsonblob blocked the request, or you are offline)":""))})}
 var lbLast=0;
 function lbSubmit(){if(!lbOn()||!S.lbn||!USER)return;if(lbBlobUrl()){bSubmit().catch(function(){});return}
  lbReq("/scores/"+lbKey(S.lbn),{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify({n:S.lbn,m:Math.floor(S.earned),pr:S.pr,as:S.asc||0,t:Date.now()})}).catch(function(){})}
