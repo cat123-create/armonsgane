@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="game-version" content="23">
+<meta name="game-version" content="24">
 <meta name="leaderboard-url" content="https://jsonblob.com/01a178c2-e3a0-734a-bfab-96bf5e2b2788">
 <title>Ore &amp; Amps</title>
 <style>
@@ -484,7 +484,7 @@ body.notabs #tabs{display:none!important}
 <section><h2>Ascension</h2><div id="ascbody"></div><div class="row" style="margin-top:8px"><button id="ascbtn" class="big"></button></div></section>
 <section><h2>Offline earnings</h2><p class="note">When you close the game or switch away, your turrets and Auto-Dispatcher keep working at 10% speed. They stop the moment they would reach a puzzle, or when they run out of energy, so the game is never fully AFK. A welcome-back card tells you what they earned.</p></section>
 </div>
-<footer><button id="reset" class="sm">Reset game</button></footer>
+<footer><span id="ver" class="note"></span> <button id="reset" class="sm">Reset game</button></footer>
 </main>
 <div id="daily" hidden><div class="box"><h2>Daily bonus</h2><p id="daily_t"></p><div class="row" style="margin-top:12px"><button class="big" id="daily_ok">Claim</button></div></div></div>
 <div id="sett" hidden><div class="box"><h2>Settings</h2>
@@ -512,7 +512,7 @@ var $=function(id){return document.getElementById(id)};
 var SET={tb:1,nf:0,an:(window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches)?0:1,sk:1,ts:1,vb:1};
 try{var svS=JSON.parse(localStorage.getItem("oa_set")||"{}");for(var qS in svS)if(qS in SET)SET[qS]=svS[qS]}catch(x){}
 function saveSet(){try{localStorage.setItem("oa_set",JSON.stringify(SET))}catch(x){}}
-function fresh(){return{e:1000,c:0,k:0,L:1,sp:0,sl:1,wr:1,m:0,t:0,earned:0,age:0,won:0,ms:0,spent:0,nx:750,pi:0,v:23,lbn:"",lbk:"",cc:0,cro:0,bf:{},asc:0,cm:0,gd:[],gh:0,dly:"",stk:0,dc:0,pr:0,bst:0,jp:0,lk:0,pf:0,dr:0,evn:0,off:0,ls:0,spn:0,spd:[],pn:0,tc:0,last:0,un:[1],tr:[],pz:0,res:60,ac:[],ab:{},al:0,ao:1}}
+function fresh(){return{e:1000,c:0,k:0,L:1,sp:0,sl:1,wr:1,m:0,t:0,earned:0,age:0,won:0,ms:0,spent:0,nx:750,pi:0,v:24,lbn:"",lbk:"",cc:0,cro:0,bf:{},asc:0,cm:0,gd:[],gh:0,dly:"",stk:0,dc:0,pr:0,bst:0,jp:0,lk:0,pf:0,dr:0,evn:0,off:0,ls:0,spn:0,spd:[],pn:0,tc:0,last:0,un:[1],tr:[],pz:0,res:60,ac:[],ab:{},al:0,ao:1}}
 function load(){if(!KEY){try{var g=sessionStorage.getItem("oa_guest");if(g){sessionStorage.removeItem("oa_guest");var o=JSON.parse(g);return o&&typeof o.e==="number"?o:null}}catch(x){}return null}try{var s=JSON.parse(localStorage.getItem(KEY));return s&&typeof s.e==="number"?s:null}catch(x){return null}}
 function migrate(o){var f=fresh();for(var k in f)if(o[k]===undefined)o[k]=f[k];o.v=f.v;return o}
 function save(){if(!KEY)return;S.ls=Date.now();try{localStorage.setItem(KEY,JSON.stringify(S))}catch(x){}}
@@ -965,9 +965,10 @@ function lbLocal(){var rows=[],us={};try{us=JSON.parse(localStorage.getItem("oa_
   if(USER&&nm.toLowerCase()===USER.toLowerCase())sv=S;else try{sv=JSON.parse(localStorage.getItem("oreAndAmps3_"+k))}catch(x){}
   if(sv&&typeof sv.earned==="number")rows.push({n:nm,m:sv.earned,pr:sv.pr||0,as:sv.asc||0,local:1})});
  rows.sort(function(a,b){return b.m-a.m});lbRows(rows.slice(0,25))}
+function gver(){var m=document.querySelector('meta[name="game-version"]');return m?m.getAttribute("content"):"?"}
 function lbRefresh(){
  var on=lbOn();$("lbjoin").hidden=!(on&&USER&&!S.lbn);
- $("lbnote").textContent=on?"Ranked by total credits earned. "+(S.lbn?"You are playing as "+S.lbn+".":USER?"Join to appear on the board.":"Log in to join."):"The worldwide leaderboard is NOT switched on, so this only shows accounts on this device (that is why you only see yourself). To switch it on, open index.html, go to line 7, which looks like <meta name=\"leaderboard-url\" content=\"\">, and paste your jsonblob URL between the two quote marks after content= .";
+ $("ver").textContent="Game version "+gver();$("lbnote").textContent=on?"Ranked by total credits earned. "+(S.lbn?"You are playing as "+S.lbn+".":USER?"Join to appear on the board.":"Log in to join."):"The worldwide leaderboard is NOT switched on, so this only shows accounts on this device (that is why you only see yourself). To switch it on, open index.html, go to line 7, which looks like <meta name=\"leaderboard-url\" content=\"\">, and paste your jsonblob URL between the two quote marks after content= .";
  if(!on){lbLocal();return}
  (lbBlobUrl()?bGet().then(function(o){return o.scores}):lbReq("/scores").then(function(r){if(!r.ok)throw 0;return r.json()})).then(function(o){
   var rows=[];Object.keys(o||{}).forEach(function(k){var r=o[k];if(r&&typeof r.n==="string"&&r.n.length<=16&&typeof r.m==="number"&&isFinite(r.m))rows.push(r)});
