@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="game-version" content="24">
+<meta name="game-version" content="25">
 <meta name="leaderboard-url" content="https://jsonblob.com/01a178c2-e3a0-734a-bfab-96bf5e2b2788">
 <title>Ore &amp; Amps</title>
 <style>
@@ -512,7 +512,7 @@ var $=function(id){return document.getElementById(id)};
 var SET={tb:1,nf:0,an:(window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches)?0:1,sk:1,ts:1,vb:1};
 try{var svS=JSON.parse(localStorage.getItem("oa_set")||"{}");for(var qS in svS)if(qS in SET)SET[qS]=svS[qS]}catch(x){}
 function saveSet(){try{localStorage.setItem("oa_set",JSON.stringify(SET))}catch(x){}}
-function fresh(){return{e:1000,c:0,k:0,L:1,sp:0,sl:1,wr:1,m:0,t:0,earned:0,age:0,won:0,ms:0,spent:0,nx:750,pi:0,v:24,lbn:"",lbk:"",cc:0,cro:0,bf:{},asc:0,cm:0,gd:[],gh:0,dly:"",stk:0,dc:0,pr:0,bst:0,jp:0,lk:0,pf:0,dr:0,evn:0,off:0,ls:0,spn:0,spd:[],pn:0,tc:0,last:0,un:[1],tr:[],pz:0,res:60,ac:[],ab:{},al:0,ao:1}}
+function fresh(){return{e:1000,c:0,k:0,L:1,sp:0,sl:1,wr:1,m:0,t:0,earned:0,age:0,won:0,ms:0,spent:0,nx:750,pi:0,v:25,lbn:"",lbk:"",cc:0,cro:0,bf:{},asc:0,cm:0,gd:[],gh:0,dly:"",stk:0,dc:0,pr:0,bst:0,jp:0,lk:0,pf:0,dr:0,evn:0,off:0,ls:0,spn:0,spd:[],pn:0,tc:0,last:0,un:[1],tr:[],pz:0,res:60,ac:[],ab:{},al:0,ao:1}}
 function load(){if(!KEY){try{var g=sessionStorage.getItem("oa_guest");if(g){sessionStorage.removeItem("oa_guest");var o=JSON.parse(g);return o&&typeof o.e==="number"?o:null}}catch(x){}return null}try{var s=JSON.parse(localStorage.getItem(KEY));return s&&typeof s.e==="number"?s:null}catch(x){return null}}
 function migrate(o){var f=fresh();for(var k in f)if(o[k]===undefined)o[k]=f[k];o.v=f.v;return o}
 function save(){if(!KEY)return;S.ls=Date.now();try{localStorage.setItem(KEY,JSON.stringify(S))}catch(x){}}
@@ -926,8 +926,8 @@ buildCrates();
 function lbBase(){return String(LB_URL||"").replace(/\/+$/,"")}
 function lbBlobUrl(){var u=String(LB_URL||"").trim();if(/\/api\/jsonBlob\/[0-9a-zA-Z-]+$/.test(u))return u;var m=u.match(/jsonblob\.com\/(?:api\/jsonBlob\/)?([0-9a-fA-F-]{8,})/);return m?"https://jsonblob.com/api/jsonBlob/"+m[1]:""}
 function lbOn(){return !!(lbBlobUrl()||lbBase())}
-function bGet(){return fetch(lbBlobUrl(),{headers:{"Accept":"application/json"}}).then(function(r){if(!r.ok)throw 0;return r.json()}).then(function(o){o=(o&&typeof o==="object")?o:{};if(!o.names||typeof o.names!=="object")o.names={};if(!o.scores||typeof o.scores!=="object")o.scores={};return o})}
-function bPut(o){return fetch(lbBlobUrl(),{method:"PUT",headers:{"Content-Type":"application/json","Accept":"application/json"},body:JSON.stringify(o)}).then(function(r){if(!r.ok)throw 0;return r})}
+function bGet(){return fetch(lbBlobUrl(),{headers:{"Accept":"application/json"}}).then(function(r){if(!r.ok)throw new Error("jsonblob answered HTTP "+r.status);return r.json()}).then(function(o){o=(o&&typeof o==="object")?o:{};if(!o.names||typeof o.names!=="object")o.names={};if(!o.scores||typeof o.scores!=="object")o.scores={};return o})}
+function bPut(o){return fetch(lbBlobUrl(),{method:"PUT",headers:{"Content-Type":"application/json","Accept":"application/json"},body:JSON.stringify(o)}).then(function(r){if(!r.ok)throw new Error("jsonblob answered HTTP "+r.status);return r})}
 function bClaim(k,tok){return bGet().then(function(o){var cur=o.names[k];if(cur===tok)return"ok";if(cur)return"taken";o.names[k]=tok;return bPut(o).then(bGet).then(function(o2){return o2.names[k]===tok?"ok":"taken"})})}
 function bSubmit(){var k=lbKey(S.lbn),tok=S.lbk;return bGet().then(function(o){var cur=o.names[k];
  if(cur&&cur!==tok){S.lbn="";save();lbMsg("Your nickname was taken by someone else at the same moment. Please choose a new one.");lbRefresh();return}
@@ -972,7 +972,7 @@ function lbRefresh(){
  if(!on){lbLocal();return}
  (lbBlobUrl()?bGet().then(function(o){return o.scores}):lbReq("/scores").then(function(r){if(!r.ok)throw 0;return r.json()})).then(function(o){
   var rows=[];Object.keys(o||{}).forEach(function(k){var r=o[k];if(r&&typeof r.n==="string"&&r.n.length<=16&&typeof r.m==="number"&&isFinite(r.m))rows.push(r)});
-  rows.sort(function(a,b){return b.m-a.m});lbRows(rows.slice(0,25))}).catch(function(e){$("lbbody").textContent="Could not reach the leaderboard right now. Address in use: "+(lbBlobUrl()||lbBase())+" . Check that it is the full address from jsonblob.com and that you saved the page there. ("+(e&&e.message?e.message:"network or permission problem")+")"})}
+  rows.sort(function(a,b){return b.m-a.m});lbRows(rows.slice(0,25))}).catch(function(e){$("lbbody").textContent="Could not reach the leaderboard right now. Address in use: "+(lbBlobUrl()||lbBase())+" . Check that it is the full address from jsonblob.com and that you saved the page there. ("+(e&&e.message?e.message:"the browser could not connect, or jsonblob blocked it")+")"})}
 $("lbgo").onclick=lbJoin;$("lbref").onclick=function(){lbSubmit();lbRefresh()};
 $("lbin").addEventListener("keydown",function(e){if(e.key==="Enter")lbJoin()});
 $("t-lb").addEventListener("click",function(){if(!$("lbin").value&&USER)$("lbin").value=USER;lbRefresh()});
