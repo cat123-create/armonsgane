@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="game-version" content="20">
-<meta name="https://jsonblob.com/01a16a9f-1520-7097-8afc-8257267c1c70/json" content="">
+<meta name="game-version" content="23">
+<meta name="leaderboard-url" content="https://jsonblob.com/01a178c2-e3a0-734a-bfab-96bf5e2b2788">
 <title>Ore &amp; Amps</title>
 <style>
 :root{--bg:#0b1220;--panel:#18222f;--line:#2f4259;--text:#e8edf3;--dim:#93a1b3;--en:#4fd1c5;--cr:#f2b84b;--co:#c792ea;--bad:#ff7a7a}
@@ -375,12 +375,14 @@ body.notabs #tabs{display:none!important}
  <h2 id="at">Log in</h2>
  <p class="note">Your username and password can be anything you like. You do not need an email. Just remember them, because there is no password reset.</p>
  <p class="note">Log in once and this device stays signed in and saves automatically until you tap Log out.</p>
+ <p class="note" id="awarn" style="color:var(--cr)" hidden><b>Careful:</b> this makes a brand NEW game that is saved only in this browser. If you already play on another device or browser, do not create an account here. Tap "I already have an account on another device" below and paste your save code.</p>
+ <p class="note" id="ahost"></p>
  <div class="frm"><label>Username <input type="text" id="au" autocomplete="username" maxlength="20" autocapitalize="off"></label>
  <label>Password <input type="password" id="ap" autocomplete="current-password" maxlength="64"></label></div>
  <p id="am" class="note" style="color:var(--bad);min-height:1.4em"></p>
  <div class="row" style="justify-content:center"><button class="big" id="ab">Log in</button><button id="as">Create account</button></div>
  <div class="row" style="justify-content:center;margin-top:8px"><button id="ag">Play as guest (no saving)</button><button id="ax" hidden>Close</button></div>
- <div class="row" style="justify-content:center;margin-top:8px"><button id="ai" class="sm">Use a save code (from another device)</button></div>
+ <div class="row" style="justify-content:center;margin-top:8px"><button id="ai" class="big">I already have an account on another device (use a save code)</button></div>
  <div id="aip" hidden><p class="note">Progress does not sync by itself between devices. On your other device, open the Stats tab, tap Make save code, then paste it here. Your progress and password come with it.</p><textarea id="aic" rows="4" spellcheck="false" placeholder="Paste your save code here"></textarea><button class="big" id="aib" style="margin-top:8px">Import</button></div>
 </div></div>
 <header id="hud"><div class="in">
@@ -510,7 +512,7 @@ var $=function(id){return document.getElementById(id)};
 var SET={tb:1,nf:0,an:(window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches)?0:1,sk:1,ts:1,vb:1};
 try{var svS=JSON.parse(localStorage.getItem("oa_set")||"{}");for(var qS in svS)if(qS in SET)SET[qS]=svS[qS]}catch(x){}
 function saveSet(){try{localStorage.setItem("oa_set",JSON.stringify(SET))}catch(x){}}
-function fresh(){return{e:1000,c:0,k:0,L:1,sp:0,sl:1,wr:1,m:0,t:0,earned:0,age:0,won:0,ms:0,spent:0,nx:750,pi:0,v:20,lbn:"",lbk:"",cc:0,cro:0,bf:{},asc:0,cm:0,gd:[],gh:0,dly:"",stk:0,dc:0,pr:0,bst:0,jp:0,lk:0,pf:0,dr:0,evn:0,off:0,ls:0,spn:0,spd:[],pn:0,tc:0,last:0,un:[1],tr:[],pz:0,res:60,ac:[],ab:{},al:0,ao:1}}
+function fresh(){return{e:1000,c:0,k:0,L:1,sp:0,sl:1,wr:1,m:0,t:0,earned:0,age:0,won:0,ms:0,spent:0,nx:750,pi:0,v:23,lbn:"",lbk:"",cc:0,cro:0,bf:{},asc:0,cm:0,gd:[],gh:0,dly:"",stk:0,dc:0,pr:0,bst:0,jp:0,lk:0,pf:0,dr:0,evn:0,off:0,ls:0,spn:0,spd:[],pn:0,tc:0,last:0,un:[1],tr:[],pz:0,res:60,ac:[],ab:{},al:0,ao:1}}
 function load(){if(!KEY){try{var g=sessionStorage.getItem("oa_guest");if(g){sessionStorage.removeItem("oa_guest");var o=JSON.parse(g);return o&&typeof o.e==="number"?o:null}}catch(x){}return null}try{var s=JSON.parse(localStorage.getItem(KEY));return s&&typeof s.e==="number"?s:null}catch(x){return null}}
 function migrate(o){var f=fresh();for(var k in f)if(o[k]===undefined)o[k]=f[k];o.v=f.v;return o}
 function save(){if(!KEY)return;S.ls=Date.now();try{localStorage.setItem(KEY,JSON.stringify(S))}catch(x){}}
@@ -965,14 +967,18 @@ function lbLocal(){var rows=[],us={};try{us=JSON.parse(localStorage.getItem("oa_
  rows.sort(function(a,b){return b.m-a.m});lbRows(rows.slice(0,25))}
 function lbRefresh(){
  var on=lbOn();$("lbjoin").hidden=!(on&&USER&&!S.lbn);
- $("lbnote").textContent=on?"Ranked by total credits earned. "+(S.lbn?"You are playing as "+S.lbn+".":USER?"Join to appear on the board.":"Log in to join."):"The worldwide leaderboard is not switched on yet, so this shows the accounts on this device. Total credits earned decides the rank.";
+ $("lbnote").textContent=on?"Ranked by total credits earned. "+(S.lbn?"You are playing as "+S.lbn+".":USER?"Join to appear on the board.":"Log in to join."):"The worldwide leaderboard is NOT switched on, so this only shows accounts on this device (that is why you only see yourself). To switch it on, open index.html, go to line 7, which looks like <meta name=\"leaderboard-url\" content=\"\">, and paste your jsonblob URL between the two quote marks after content= .";
  if(!on){lbLocal();return}
  (lbBlobUrl()?bGet().then(function(o){return o.scores}):lbReq("/scores").then(function(r){if(!r.ok)throw 0;return r.json()})).then(function(o){
   var rows=[];Object.keys(o||{}).forEach(function(k){var r=o[k];if(r&&typeof r.n==="string"&&r.n.length<=16&&typeof r.m==="number"&&isFinite(r.m))rows.push(r)});
-  rows.sort(function(a,b){return b.m-a.m});lbRows(rows.slice(0,25))}).catch(function(){$("lbbody").textContent="Could not reach the leaderboard right now."})}
+  rows.sort(function(a,b){return b.m-a.m});lbRows(rows.slice(0,25))}).catch(function(e){$("lbbody").textContent="Could not reach the leaderboard right now. Address in use: "+(lbBlobUrl()||lbBase())+" . Check that it is the full address from jsonblob.com and that you saved the page there. ("+(e&&e.message?e.message:"network or permission problem")+")"})}
 $("lbgo").onclick=lbJoin;$("lbref").onclick=function(){lbSubmit();lbRefresh()};
 $("lbin").addEventListener("keydown",function(e){if(e.key==="Enter")lbJoin()});
 $("t-lb").addEventListener("click",function(){if(!$("lbin").value&&USER)$("lbin").value=USER;lbRefresh()});
+function cloudOn(){return !!lbBase()&&!lbBlobUrl()}
+var cpBusy=false;
+function cloudPush(keep){if(!USER||window.OA_NOSYNC||!cloudOn()||cpBusy)return;cpBusy=true;
+ makeCode().then(function(code){return fetch(lbBase()+"/saves/"+lbKey(USER)+".json",{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify({t:S.ls||Date.now(),c:code}),keepalive:!!keep})}).catch(function(){}).then(function(){cpBusy=false})}
 function mulTxt(n){return n<1000?String(Math.round(n*10)/10):fmt(n)}
 var KEEP=["earned","ms","age","ac","tc","pn","bst","jp","lk","pf","dr","evn","off","spn","spd","won","ab","al","ao","pi","res","asc","cm","gd","gh","dly","stk","dc","cc","cro","bf","lbn","lbk"];
 function canAsc(){return S.pr>=10}
@@ -1028,7 +1034,7 @@ function updPres(){
  $("t-pres").classList.toggle("ready",canPres()||canAsc())}
 $("ascbtn").onclick=doAsc;
 $("presbtn").onclick=doPres;
-function tick(){S.age++;safe(gapCheck);if(S.age%60===0)safe(lbSubmit);safe(guideStep);if(S.age%30===0)safe(dailyCheck);safe(evStep);if(music)safe(musicTick);if(S.tr.length&&!puz&&Math.random()<.5)sfx("tink");
+function tick(){S.age++;safe(gapCheck);if(S.age%30===5)safe(cloudPush);if(S.age%60===0)safe(lbSubmit);safe(guideStep);if(S.age%30===0)safe(dailyCheck);safe(evStep);if(music)safe(musicTick);if(S.tr.length&&!puz&&Math.random()<.5)sfx("tink");
  var on=false,run=S.m>0&&!S.pz&&!puz;
  if(run){var yy=yieldNow();for(var i=0;i<S.m;i++){if(S.e>=DRAIN+S.res){S.e-=DRAIN;S.spent+=DRAIN;on=true;gain(0.1*yy*(1+0.3*S.t)*bonus()*(EV&&EV.id==="ovr"?3:1))}}}
  A.fire(on);
@@ -1511,7 +1517,7 @@ say("Welcome! Open the Mines tab and send a worker to the Copper Pit.");safe(sta
 render();setInterval(tick,1000);setInterval(function(){finishTrips();if(!puz)safe(autoDispatch)},250);
 if(S.spent>=S.nx)openPuzzle();
 try{if(!localStorage.getItem("oaIntro"))$("intro").hidden=false}catch(x){}
-document.addEventListener("visibilitychange",function(){if(document.hidden)save();else{safe(gapCheck);safe(finishTrips)}});
+document.addEventListener("visibilitychange",function(){if(document.hidden){save();safe(function(){cloudPush(true)})}else{safe(gapCheck);safe(finishTrips)}});
 if(window.addEventListener){window.addEventListener("pagehide",save);window.addEventListener("beforeunload",save)}
 document.addEventListener("keydown",function(e){if(e.target!==document.body)return;if(e.code==="Space"&&(!$("p-mine").hidden||!$("p-mines").hidden)){e.preventDefault();sendCrew()}else if(e.code==="KeyP")pause();else if(e.code==="KeyF")toggleFs()});
 window.OAgame={makeCode:makeCode,prepareUpdate:function(){if(USER)save();else{try{sessionStorage.setItem("oa_guest",JSON.stringify(S))}catch(x){}}return true},adopt:function(u){USER=u;KEY="oreAndAmps3_"+u.toLowerCase();save();userUI();say("Account created. Your progress is now saved.")}};
@@ -1550,16 +1556,33 @@ function applyImport(o){
  U[key]={n:name,s:rec.s,h:rec.h};if(!putUsers(U))throw new Error("This browser blocked saving.");
  try{localStorage.setItem(GK+key,JSON.stringify(d))}catch(e){throw new Error("This browser blocked saving.")}
  done(name,false)}
+function cloud(){return (typeof LB_URL==="string"&&LB_URL.trim()&&!/jsonblob\.com/i.test(LB_URL))?LB_URL.trim().replace(/\/+$/,""):""}
+function creq(path,opt){return fetch(cloud()+path+".json",opt||{})}
+function cget(path){return creq(path).then(function(r){if(!r.ok)throw new Error("net");return r.json()})}
+function cput(path,val){return creq(path,{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify(val)})}
+function localSaveTime(key){try{var o=JSON.parse(localStorage.getItem(GK+key));return o&&typeof o.ls==="number"?o.ls:0}catch(e){return 0}}
+function cloudEnsure(name){var key=name.toLowerCase(),rec=users()[key];if(!rec)return Promise.resolve();
+ return cget("/accts/"+key).then(function(cur){
+  if(!cur)return cput("/accts/"+key,{n:rec.n,s:rec.s,h:rec.h});
+  if(cur.h!==rec.h){window.OA_NOSYNC=true;try{alert("The username "+rec.n+" is already used online by someone else with a different password, so your progress will NOT sync between devices. Your game on this device still works.")}catch(e){}}})}
+function cloudPull(name){var key=name.toLowerCase();
+ return cget("/saves/"+key).then(function(r){if(!r||typeof r.c!=="string")return;
+  return decodeCode(r.c).then(function(o){var d=o&&o.d;if(d&&typeof d.e==="number"&&(d.ls||0)>localSaveTime(key)){try{localStorage.setItem(GK+key,JSON.stringify(d))}catch(e){}}})})}
+function syncIn(name,isNew){if(!cloud())return Promise.resolve();
+ var p=cloudEnsure(name).catch(function(){});
+ return isNew?p:p.then(function(){return cloudPull(name)}).catch(function(){})}
 function msg(t){$("am").textContent=t||""}
-function setMode(m){mode=m;$("at").textContent=m==="login"?"Log in":"Create account";$("ab").textContent=m==="login"?"Log in":"Create account";
+function setMode(m){mode=m;$("awarn").hidden=(m!=="register"||!!cloud());$("ahost").textContent=cloud()?"Online accounts are on: log in with the same username and password on any device.":"You are on: "+location.host+location.pathname+" . Accounts are saved only in the browser and web address you made them on.";$("at").textContent=m==="login"?"Log in":"Create account";$("ab").textContent=m==="login"?"Log in":"Create account";
  $("as").textContent=m==="login"?"Create account":"I already have an account";$("ap").autocomplete=m==="login"?"current-password":"new-password";msg("")}
 function done(name,isNew){
  if(started&&!isNew&&!confirm("Logging in will replace your current guest game with the saved one. Continue?"))return;
  try{localStorage.setItem(SK,name)}catch(e){}
  $("auth").hidden=true;
- if(!started){started=true;window.startGame(name)}
- else if(isNew&&window.OAgame)window.OAgame.adopt(name);
- else location.reload()}
+ var go=function(){if(!started){started=true;window.startGame(name)}
+  else if(isNew&&window.OAgame)window.OAgame.adopt(name);
+  else location.reload()};
+ if(!cloud()){go();return}
+ Promise.race([syncIn(name,isNew),new Promise(function(r){setTimeout(r,5000)})]).catch(function(){}).then(go)}
 function submit(){
  var name=$("au").value.trim(),pw=$("ap").value,key=name.toLowerCase(),U=users();
  if(!/^[A-Za-z0-9_]{3,20}$/.test(name))return msg("Username: 3 to 20 letters, numbers, or underscores.");
@@ -1567,9 +1590,22 @@ function submit(){
   if(pw.length<6)return msg("Password must be at least 6 characters.");
   if(U[key])return msg("That username is taken.");
   var sl=salt(),alg=canPbk()?"p":"c";
+  if(cloud()){msg("Checking...");
+   cget("/accts/"+key).then(function(cur){if(cur)return msg("That username is taken online. Pick another one.");
+    return hash(pw,sl,alg).then(function(h){return cput("/accts/"+key,{n:name,s:sl,h:h}).then(function(r){
+     if(!r.ok)return msg(r.status===401||r.status===403?"That username is taken online. Pick another one.":"Could not reach the online database. Try again.");
+     var V=users();V[key]={n:name,s:sl,h:h};if(!putUsers(V))return msg("This browser blocked saving accounts.");done(name,true)})})
+   }).catch(function(){msg("Could not reach the online database. Check your connection and try again.")});return}
   hash(pw,sl,alg).then(function(h){var V=users();if(V[key])return msg("That username is taken.");V[key]={n:name,s:sl,h:h};if(!putUsers(V))return msg("This browser blocked saving accounts.");done(name,true)});
  }else{
-  var u=U[key];if(!u)return msg("No account with that username.");
+  var u=U[key];
+  if(!u&&cloud()){msg("Checking...");
+   cget("/accts/"+key).then(function(cur){if(!cur||typeof cur.h!=="string"||typeof cur.s!=="string")return msg("No account with that username.");
+    var a2=cur.h.charAt(0);if(a2==="p"&&!canPbk())return msg("This browser cannot check that password.");
+    return hash(pw,cur.s,a2).then(function(h){if(h!==cur.h)return msg("Wrong password.");
+     var V=users();V[key]={n:cur.n||name,s:cur.s,h:cur.h};if(!putUsers(V))return msg("This browser blocked saving accounts.");done(V[key].n,false)})
+   }).catch(function(){msg("Could not reach the online database. Check your connection and try again.")});return}
+  if(!u)return msg("No account with that username.");
   var a=u.h.charAt(0);if(a==="p"&&!canPbk())return msg("This browser cannot check that password.");
   hash(pw,u.s,a).then(function(h){if(h===u.h)done(u.n,false);else msg("Wrong password.")})}}
 $("ab").onclick=submit;
@@ -1579,7 +1615,7 @@ $("as").onclick=function(){setMode(mode==="login"?"register":"login")};
 $("ag").onclick=function(){if(!started){started=true;$("auth").hidden=true;window.startGame(null)}};
 $("ax").onclick=function(){$("auth").hidden=true};
 ["au","ap"].forEach(function(i){$(i).addEventListener("keydown",function(e){if(e.key==="Enter")submit()})});
-window.openAuth=function(){setMode("register");$("ax").hidden=false;$("ag").hidden=true;$("auth").hidden=false};
+window.openAuth=function(){setMode(Object.keys(users()).length?"login":"register");$("ax").hidden=false;$("ag").hidden=true;$("auth").hidden=false};
 var sess=null;try{sess=localStorage.getItem(SK)||sessionStorage.getItem(SK)}catch(e){}
 var U0=users();
 if(sess&&U0[sess.toLowerCase()]){started=true;$("auth").hidden=true;window.startGame(U0[sess.toLowerCase()].n)}
